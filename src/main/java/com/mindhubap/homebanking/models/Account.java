@@ -4,6 +4,8 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Account {
@@ -20,6 +22,9 @@ public class Account {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="client_id")
     private Client client;
+
+    @OneToMany(mappedBy = "account", fetch = FetchType.EAGER)
+    Set<Transaction> transactions = new HashSet<>();
 
     public Account() {
     }
@@ -40,6 +45,10 @@ public class Account {
         this.creationDate = creationDate;
         this.balance = balance;
         this.client = client;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public String getNumber() {
@@ -66,15 +75,20 @@ public class Account {
         this.balance = balance;
     }
 
-    public long getId() {
-        return id;
-    }
-
     public Client getClient() {
         return client;
     }
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public Set<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void addTransaction(Transaction transaction) {
+        transaction.setAccount(this);
+        this.transactions.add(transaction);
     }
 }

@@ -14,7 +14,7 @@ Vue.createApp({
     methods: {
         // load and display JSON sent by server for /clients
         loadData() {
-            axios.get("/clients")
+            axios.get("/rest/clients")
                 .then((response) => {
                     // handle success
                     this.outPut = response.data;
