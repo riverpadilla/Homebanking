@@ -1,11 +1,8 @@
 package com.mindhubap.homebanking.dtos;
 
-import com.mindhubap.homebanking.models.Account;
 import com.mindhubap.homebanking.models.Transaction;
-import com.mindhubap.homebanking.models.TransactionType;
-import org.hibernate.annotations.GenericGenerator;
+import com.mindhubap.homebanking.enums.TransactionType;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 public class TransactionDTO {

@@ -1,5 +1,6 @@
 package com.mindhubap.homebanking.dtos;
 
+import com.mindhubap.homebanking.models.Card;
 import com.mindhubap.homebanking.models.Client;
 
 import java.util.List;
@@ -16,6 +17,8 @@ public class ClientDTO {
 
     private List<ClientLoanDTO> loans;
 
+    private List<CardDTO> cards;
+
     public ClientDTO(Client client) {
         id = client.getId();
         firstName = client.getFirstName();
@@ -26,6 +29,9 @@ public class ClientDTO {
                 .collect(Collectors.toSet());
         loans = client.getLoans()
                 .stream().map(ClientLoanDTO::new)
+                .collect(Collectors.toList());
+        cards = client.getCards()
+                .stream().map(CardDTO::new)
                 .collect(Collectors.toList());
     }
 
@@ -51,5 +57,9 @@ public class ClientDTO {
 
     public List<ClientLoanDTO> getLoans() {
         return loans;
+    }
+
+    public List<CardDTO> getCards() {
+        return cards;
     }
 }

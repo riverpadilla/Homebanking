@@ -1,7 +1,6 @@
-package com.mindhubap.homebanking.models;
+package com.mindhubap.homebanking.enums;
 
 public enum TransactionType {
-
     CREDIT,
     DEBIT
 }

@@ -1,5 +1,8 @@
 package com.mindhubap.homebanking;
 
+import com.mindhubap.homebanking.enums.CardColor;
+import com.mindhubap.homebanking.enums.CardType;
+import com.mindhubap.homebanking.enums.TransactionType;
 import com.mindhubap.homebanking.models.*;
 import com.mindhubap.homebanking.repositories.*;
 import org.springframework.boot.CommandLineRunner;
@@ -23,20 +26,21 @@ public class HomebankingApplication {
 									  AccountRepository accountRepository,
 									  TransactionRepository transactionRepository,
 									  LoanRepository loanRepository,
-									  ClientLoanRepository clientLoanRepository) {
+									  ClientLoanRepository clientLoanRepository,
+									  CardRepository cardRepository) {
 		return (args) -> {
 			//create Clients
-			Client client1 = new Client("Melba", "Morel","melba@maindhub.com");
-			Client client2 = new Client("Rivelino","Padilla","riverpadilla@msn.com");
+			Client client1 = new Client("Melba", "Morel", "melba@maindhub.com");
+			Client client2 = new Client("Rivelino", "Padilla", "riverpadilla@msn.com");
 
 			//Save Clients in DB
 			clientRepository.save(client1);
 			clientRepository.save(client2);
 
 			// Create accounts
-			Account account1 = new Account("VIN001", LocalDate.now().minusDays(2),5000);
-			Account account2 = new Account("VIN002", LocalDate.now().minusDays(1),7500);
-			Account account3 = new Account("VIN003", LocalDate.now().minusDays(3),8000);
+			Account account1 = new Account("VIN001", LocalDate.now().minusDays(2), 5000);
+			Account account2 = new Account("VIN002", LocalDate.now().minusDays(1), 7500);
+			Account account3 = new Account("VIN003", LocalDate.now().minusDays(3), 8000);
 
 
 			// Add Account to Client
@@ -51,18 +55,18 @@ public class HomebankingApplication {
 
 
 			//Create Transactions
-			Transaction transaction1 = new Transaction(TransactionType.CREDIT,1500,"Direct Deposit - Salary", LocalDateTime.now().minusDays(2));
-			Transaction transaction2 = new Transaction(TransactionType.CREDIT,1600,"Direct Deposit - Interest", LocalDateTime.now().minusDays(1));
-			Transaction transaction3 = new Transaction(TransactionType.CREDIT,1700,"Rent", LocalDateTime.now());
-			Transaction transaction4 = new Transaction(TransactionType.CREDIT,1800,"Payment", LocalDateTime.now().minusDays(2));
-			Transaction transaction5 = new Transaction(TransactionType.CREDIT,1900,"Direct Deposit - Interest", LocalDateTime.now().minusDays(1));
-			Transaction transaction6 = new Transaction(TransactionType.CREDIT,2000,"Direct Deposit - Salary", LocalDateTime.now());
-			Transaction transaction7 = new Transaction(TransactionType.DEBIT,-500,"Buy on Amazon", LocalDateTime.now().minusDays(2));
-			Transaction transaction8 = new Transaction(TransactionType.DEBIT,-800,"Rent Payment", LocalDateTime.now().minusDays(1));
-			Transaction transaction9 = new Transaction(TransactionType.DEBIT,-200,"Buy on EBay", LocalDateTime.now());
-			Transaction transaction10 = new Transaction(TransactionType.DEBIT,-100,"Internet Service", LocalDateTime.now().minusDays(1));
-			Transaction transaction11 = new Transaction(TransactionType.DEBIT,-250,"Public Services", LocalDateTime.now());
-			Transaction transaction12 = new Transaction(TransactionType.DEBIT,-50,"Buy on AliExpress", LocalDateTime.now());
+			Transaction transaction1 = new Transaction(TransactionType.CREDIT, 1500, "Direct Deposit - Salary", LocalDateTime.now().minusDays(2));
+			Transaction transaction2 = new Transaction(TransactionType.CREDIT, 1600, "Direct Deposit - Interest", LocalDateTime.now().minusDays(1));
+			Transaction transaction3 = new Transaction(TransactionType.CREDIT, 1700, "Rent", LocalDateTime.now());
+			Transaction transaction4 = new Transaction(TransactionType.CREDIT, 1800, "Payment", LocalDateTime.now().minusDays(2));
+			Transaction transaction5 = new Transaction(TransactionType.CREDIT, 1900, "Direct Deposit - Interest", LocalDateTime.now().minusDays(1));
+			Transaction transaction6 = new Transaction(TransactionType.CREDIT, 2000, "Direct Deposit - Salary", LocalDateTime.now());
+			Transaction transaction7 = new Transaction(TransactionType.DEBIT, -500, "Buy on Amazon", LocalDateTime.now().minusDays(2));
+			Transaction transaction8 = new Transaction(TransactionType.DEBIT, -800, "Rent Payment", LocalDateTime.now().minusDays(1));
+			Transaction transaction9 = new Transaction(TransactionType.DEBIT, -200, "Buy on EBay", LocalDateTime.now());
+			Transaction transaction10 = new Transaction(TransactionType.DEBIT, -100, "Internet Service", LocalDateTime.now().minusDays(1));
+			Transaction transaction11 = new Transaction(TransactionType.DEBIT, -250, "Public Services", LocalDateTime.now());
+			Transaction transaction12 = new Transaction(TransactionType.DEBIT, -50, "Buy on AliExpress", LocalDateTime.now());
 
 			// Add Transaction to Account
 			account1.addTransaction(transaction1);
@@ -93,9 +97,9 @@ public class HomebankingApplication {
 			transactionRepository.save(transaction12);
 
 			// Create Loads
-			Loan loan1 = new Loan("Mortgage",500000, List.of(12,24,36,48,60));
-			Loan loan2 = new Loan("Personal",100000, List.of(6,12,24));
-			Loan loan3 = new Loan("Automotive",300000, List.of(6,12,24,36));
+			Loan loan1 = new Loan("Mortgage", 500000, List.of(12, 24, 36, 48, 60));
+			Loan loan2 = new Loan("Personal", 100000, List.of(6, 12, 24));
+			Loan loan3 = new Loan("Automotive", 300000, List.of(6, 12, 24, 36));
 
 			// Save Loans to DB
 			loanRepository.save(loan1);
@@ -103,10 +107,10 @@ public class HomebankingApplication {
 			loanRepository.save(loan3);
 
 			//Create ClientLoan
-			ClientLoan clientLoan1 = new ClientLoan(400000,60);
-			ClientLoan clientLoan2 = new ClientLoan(50000,12);
-			ClientLoan clientLoan3 = new ClientLoan(100000,24);
-			ClientLoan clientLoan4 = new ClientLoan(200000,36);
+			ClientLoan clientLoan1 = new ClientLoan(400000, 60);
+			ClientLoan clientLoan2 = new ClientLoan(50000, 12);
+			ClientLoan clientLoan3 = new ClientLoan(100000, 24);
+			ClientLoan clientLoan4 = new ClientLoan(200000, 36);
 
 			// Add Client to ClientLoan
 			client1.addLoan(clientLoan1);
@@ -126,6 +130,22 @@ public class HomebankingApplication {
 			clientLoanRepository.save(clientLoan3);
 			clientLoanRepository.save(clientLoan4);
 
+			// Create Cards
+			String name1 = client1.getFirstName() + " " + client1.getLastName();
+			Card card1 = new Card(name1, CardType.DEBIT, CardColor.GOLD, "4567-1234-8765-9876", (short)123, LocalDate.now(), LocalDate.now().plusYears(5));
+			Card card2 = new Card(name1, CardType.CREDIT, CardColor.TITANIUM, "4567-8765-1234-6789", (short)567, LocalDate.now(), LocalDate.now().plusYears(5));
+			String name2 = client2.getFirstName() + " " + client2.getLastName();
+			Card card3 = new Card(name2, CardType.CREDIT, CardColor.SILVER, "4567-7890-8765-1234", (short)246, LocalDate.now().minusYears(1), LocalDate.now().plusYears(4));
+
+			// Add Card to Client
+			client1.addCard(card1);
+			client1.addCard(card2);
+			client2.addCard(card3);
+
+			// Save Card to DB
+			cardRepository.save(card1);
+			cardRepository.save(card2);
+			cardRepository.save(card3);
 
 		};
 	}
