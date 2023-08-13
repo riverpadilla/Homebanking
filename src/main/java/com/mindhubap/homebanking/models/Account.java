@@ -20,7 +20,6 @@ public class Account {
     private double balance;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="client_id")
     private Client client;
 
     @OneToMany(mappedBy = "account", fetch = FetchType.EAGER)
@@ -91,4 +90,6 @@ public class Account {
         transaction.setAccount(this);
         this.transactions.add(transaction);
     }
+
+
 }
