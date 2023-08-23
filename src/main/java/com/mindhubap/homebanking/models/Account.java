@@ -28,11 +28,6 @@ public class Account {
     public Account() {
     }
 
-    public Account(String number, LocalDate creationDate) {
-        this.number = number;
-        this.creationDate = creationDate;
-    }
-
     public Account(String number, LocalDate creationDate, double balance) {
         this.number = number;
         this.creationDate = creationDate;

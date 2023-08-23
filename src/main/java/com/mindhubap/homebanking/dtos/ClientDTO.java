@@ -62,4 +62,5 @@ public class ClientDTO {
     public List<CardDTO> getCards() {
         return cards;
     }
+
 }
