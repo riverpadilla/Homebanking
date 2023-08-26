@@ -12,9 +12,9 @@ Vue.createApp({
         this.loadData();
     },
     methods: {
-        // load and display JSON sent by server for /rest/clients
+        // load and display JSON sent by server for /clients
         loadData() {
-            axios.get("/rest/clients")
+            axios.get("/clients")
                 .then((response) => {
                     // handle success
                     this.outPut = response.data;

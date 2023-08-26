@@ -1,9 +1,12 @@
 package com.mindhubap.homebanking.controllers;
 
 import com.mindhubap.homebanking.dtos.AccountDTO;
+import com.mindhubap.homebanking.dtos.CardDTO;
 import com.mindhubap.homebanking.models.Account;
+import com.mindhubap.homebanking.models.Card;
 import com.mindhubap.homebanking.models.Client;
 import com.mindhubap.homebanking.repositories.AccountRepository;
+import com.mindhubap.homebanking.repositories.CardRepository;
 import com.mindhubap.homebanking.repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,42 +20,41 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api")
-public class AccountController {
-
+@RequestMapping("api/")
+public class CardController {
     @Autowired
-    private AccountRepository accountRepository;
+    private CardRepository cardRepository;
     @Autowired
     private ClientRepository clientRepository;
 
-    @RequestMapping("/accounts")
-    private List<AccountDTO> getAccounts(){
-        return accountRepository.findAll().stream().map(AccountDTO::new).collect(Collectors.toList());
+    @RequestMapping("/cards")
+    private List<CardDTO> getCards(){
+        return cardRepository.findAll().stream().map(CardDTO::new).collect(Collectors.toList());
     }
 
-    @RequestMapping("/accounts/{id}")
-    private AccountDTO getAccount(@PathVariable Long id){
-        return accountRepository.findById(id).map(AccountDTO::new).orElse(null);
+    @RequestMapping("/cards/{id}")
+    private CardDTO getCard(@PathVariable Long id){
+        return cardRepository.findById(id).map(CardDTO::new).orElse(null);
     }
 
-    @RequestMapping(path = "/clients/current/accounts")
-    private Set<AccountDTO> getCurrentAccounts(Authentication authentication)
+    @RequestMapping(path = "/clients/current/cards")
+    private Set<CardDTO> getCurrentCards(Authentication authentication)
     {
         Client client = clientRepository.findByEmail(authentication.getName());
-        return client.getAccounts()
+        return client.getCards()
                 .stream()
-                .map(AccountDTO::new)
+                .map(CardDTO::new)
                 .collect(Collectors.toSet());
     }
 
-    @RequestMapping(path = "/clients/current/accounts", method = RequestMethod.POST)
-    public ResponseEntity<Object> createAccount(Authentication authentication)
+    @RequestMapping(path = "/clients/current/cards", method = RequestMethod.POST)
+    public ResponseEntity<Object> createCard(Authentication authentication,)
     {
         Client client = clientRepository.findByEmail(authentication.getName());
 
-        if (client.getAccounts().size() < 3) {
+        if (client.getCards().size() < 3) {
 
-            Account account= new Account("", LocalDate.now(), 0, client);
+            Card card = new Card("", LocalDate.now(), 0, client);
             account.generateNumber(accountRepository.findAll());
             accountRepository.save(account);
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -72,7 +74,7 @@ public class AccountController {
             {
                 System.out.println(account.getNumber());
                 if(account.getNumber().equals(number)){
-                   check=false;
+                    check=false;
                 }
             }
         } while(!check);
