@@ -1,23 +1,25 @@
 package com.mindhubap.homebanking.controllers;
 
-import com.mindhubap.homebanking.dtos.AccountDTO;
 import com.mindhubap.homebanking.dtos.CardDTO;
-import com.mindhubap.homebanking.models.Account;
+import com.mindhubap.homebanking.enums.CardColor;
+import com.mindhubap.homebanking.enums.CardType;
 import com.mindhubap.homebanking.models.Card;
 import com.mindhubap.homebanking.models.Client;
-import com.mindhubap.homebanking.repositories.AccountRepository;
 import com.mindhubap.homebanking.repositories.CardRepository;
 import com.mindhubap.homebanking.repositories.ClientRepository;
+import com.mindhubap.homebanking.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("api/")
@@ -27,18 +29,18 @@ public class CardController {
     @Autowired
     private ClientRepository clientRepository;
 
-    @RequestMapping("/cards")
-    private List<CardDTO> getCards(){
+    @GetMapping("/cards")
+    public List<CardDTO> getCards(){
         return cardRepository.findAll().stream().map(CardDTO::new).collect(Collectors.toList());
     }
 
-    @RequestMapping("/cards/{id}")
-    private CardDTO getCard(@PathVariable Long id){
+    @GetMapping("/cards/{id}")
+    public CardDTO getCard(@PathVariable Long id){
         return cardRepository.findById(id).map(CardDTO::new).orElse(null);
     }
 
-    @RequestMapping(path = "/clients/current/cards")
-    private Set<CardDTO> getCurrentCards(Authentication authentication)
+    @GetMapping("/clients/current/cards")
+    public Set<CardDTO> getCurrentCards(Authentication authentication)
     {
         Client client = clientRepository.findByEmail(authentication.getName());
         return client.getCards()
@@ -47,38 +49,33 @@ public class CardController {
                 .collect(Collectors.toSet());
     }
 
-    @RequestMapping(path = "/clients/current/cards", method = RequestMethod.POST)
-    public ResponseEntity<Object> createCard(Authentication authentication,)
+    @PostMapping("/clients/current/cards")
+    public ResponseEntity<Object> createCard(
+            Authentication authentication,
+            @RequestParam CardColor cardColor,
+            @RequestParam CardType cardType
+            )
     {
         Client client = clientRepository.findByEmail(authentication.getName());
+        int creditCardsCount = 0, debitCardsCount = 0;
 
-        if (client.getCards().size() < 3) {
+        for(Card card:client.getCards()){
+            if(card.getType().equals(CardType.CREDIT)) creditCardsCount++;
+            else debitCardsCount++;
+        }
 
-            Card card = new Card("", LocalDate.now(), 0, client);
-            account.generateNumber(accountRepository.findAll());
-            accountRepository.save(account);
-            return new ResponseEntity<>(HttpStatus.CREATED);
+        if ((cardType == CardType.CREDIT && creditCardsCount < 3) || (cardType == CardType.DEBIT && debitCardsCount < 3)){
+            String cardHolder = client.getFirstName() + " " + client.getLastName();
+            String number = Utils.generateCardNumber(cardRepository.findAll());
+            short cvv = (short)(100 + Math.random() * 899);
+            Card card = new Card(cardHolder, cardType, cardColor, number, cvv, LocalDate.now(),LocalDate.now().plusYears(5));
+            client.addCard(card);
+            cardRepository.save(card);
+            clientRepository.save(client);
+            return new ResponseEntity<>("Card added to client " + card.getCardHolder(), HttpStatus.CREATED);
+        }
 
-        } else return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>("The maximum number of cards of the same type has been reached", HttpStatus.FORBIDDEN);
     }
 
-    private String generateAccountNumber()
-    {
-        String number;
-        boolean check;
-        do {
-            check=true;
-            number = "VIN-" + String.format("%06d", 11111111 + (int)(Math.random() * 99999999));
-
-            for(AccountDTO account:this.getAccounts())
-            {
-                System.out.println(account.getNumber());
-                if(account.getNumber().equals(number)){
-                    check=false;
-                }
-            }
-        } while(!check);
-
-        return number;
-    }
 }

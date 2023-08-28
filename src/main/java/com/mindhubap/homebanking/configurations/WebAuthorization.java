@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-;
 @EnableWebSecurity
 @Configuration
 public class WebAuthorization {
@@ -22,12 +21,14 @@ public class WebAuthorization {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.authorizeRequests()
-                .antMatchers("/web/index.html","/web/*/*").permitAll()
-                .antMatchers(HttpMethod.POST,"/api/clients/**").permitAll()
-                //.antMatchers(HttpMethod.POST,"/api/clients/current/accounts").hasAnyAuthority("CLIENT","ADMIN")
-                .antMatchers("/web/**").hasAnyAuthority("CLIENT", "ADMIN")
-                .antMatchers("/api/**").hasAnyAuthority("CLIENT", "ADMIN")
-                .antMatchers("/api/clients/current/**").hasAnyAuthority("CLIENT","ADMIN")
+                .antMatchers("/web/index.html","/web/**").permitAll()
+                .antMatchers(HttpMethod.POST,"/api/clients").permitAll()
+                .antMatchers(HttpMethod.GET,"/api/clients").hasAuthority("ADMIN")
+                .antMatchers(HttpMethod.GET,"/api/accounts","/api/accounts/*").hasAuthority("ADMIN")
+                .antMatchers(HttpMethod.GET,"/api/cards","/api/cards/*").hasAuthority("ADMIN")
+                .antMatchers("/api/clients/current").hasAnyAuthority("CLIENT","ADMIN")
+                .antMatchers("/api/clients/current/accounts/**").hasAuthority("CLIENT")
+                .antMatchers("/api/clients/current/cards").hasAuthority("CLIENT")
                 .antMatchers("/rest/**").hasAuthority("ADMIN")
                 .antMatchers("/manager.*").hasAuthority("ADMIN")
                 .antMatchers("/h2-console/**").hasAuthority("ADMIN")

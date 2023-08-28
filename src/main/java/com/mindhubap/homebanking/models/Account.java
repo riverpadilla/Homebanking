@@ -51,24 +51,7 @@ public class Account {
         return number;
     }
 
-    public void generateNumber(List<Account> accounts) {
-        String number;
-        boolean check;
-        do {
-            check=true;
-            number = "VIN-" + String.format("%08d", 11111111 + (int)(Math.random() * 88888888));
-
-            for(Account account:accounts)
-            {
-                System.out.println(account);
-                if(account.getNumber().equals(number)){
-                check=false;
-                }
-            }
-        } while(!check);
-
-        this.number = number;
-    }
+    public void setNumber(String number) { this.number = number; }
 
     public LocalDate getCreationDate() {
         return creationDate;

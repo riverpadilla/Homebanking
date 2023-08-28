@@ -5,6 +5,7 @@ import com.mindhubap.homebanking.models.Account;
 import com.mindhubap.homebanking.models.Client;
 import com.mindhubap.homebanking.repositories.AccountRepository;
 import com.mindhubap.homebanking.repositories.ClientRepository;
+import com.mindhubap.homebanking.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,18 +26,20 @@ public class AccountController {
     @Autowired
     private ClientRepository clientRepository;
 
-    @RequestMapping("/accounts")
-    private List<AccountDTO> getAccounts(){
+    @GetMapping("/accounts")
+    public List<AccountDTO> getAccounts(){
         return accountRepository.findAll().stream().map(AccountDTO::new).collect(Collectors.toList());
     }
 
-    @RequestMapping("/accounts/{id}")
-    private AccountDTO getAccount(@PathVariable Long id){
-        return accountRepository.findById(id).map(AccountDTO::new).orElse(null);
+    @GetMapping("/accounts/{id}")
+    public AccountDTO getAccount(@PathVariable Long id){
+            Account account = accountRepository.findById(id).orElse(null);
+            if(account != null) return new AccountDTO(account);
+            return null;
     }
 
-    @RequestMapping(path = "/clients/current/accounts")
-    private Set<AccountDTO> getCurrentAccounts(Authentication authentication)
+    @GetMapping("/clients/current/accounts")
+    public Set<AccountDTO> getCurrentAccounts(Authentication authentication)
     {
         Client client = clientRepository.findByEmail(authentication.getName());
         return client.getAccounts()
@@ -45,38 +48,32 @@ public class AccountController {
                 .collect(Collectors.toSet());
     }
 
-    @RequestMapping(path = "/clients/current/accounts", method = RequestMethod.POST)
+    @PostMapping("/clients/current/accounts")
     public ResponseEntity<Object> createAccount(Authentication authentication)
     {
         Client client = clientRepository.findByEmail(authentication.getName());
 
         if (client.getAccounts().size() < 3) {
+            String number = Utils.generateAccountNumber(accountRepository.findAll());
+            Account account= new Account(number, LocalDate.now(), 0, client);
 
-            Account account= new Account("", LocalDate.now(), 0, client);
-            account.generateNumber(accountRepository.findAll());
             accountRepository.save(account);
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>("Account added to client " + account.getClient().getEmail() , HttpStatus.CREATED);
 
-        } else return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>("The Maximum Number of Accounts has been reached", HttpStatus.FORBIDDEN);
     }
 
-    private String generateAccountNumber()
-    {
-        String number;
-        boolean check;
-        do {
-            check=true;
-            number = "VIN-" + String.format("%06d", 11111111 + (int)(Math.random() * 99999999));
+    @GetMapping("clients/current/accounts/{id}")
+    public AccountDTO getCurrentAccount(Authentication authentication, @PathVariable Long id){
 
-            for(AccountDTO account:this.getAccounts())
-            {
-                System.out.println(account.getNumber());
-                if(account.getNumber().equals(number)){
-                   check=false;
-                }
-            }
-        } while(!check);
-
-        return number;
+        Client client = clientRepository.findByEmail(authentication.getName());
+        Account account = accountRepository.findById(id).orElse(null);
+        if ((account != null) && (client.getAccounts().contains(account))){
+            return new AccountDTO(account);
+        }
+        return null;
     }
+
 }
