@@ -10,48 +10,20 @@ import java.util.List;
 
 public class Utils {
 
-    static public String generateAccountNumber(List<Account> accounts)
+    static public String generateAccountNumber()
     {
-        String number;
-        boolean check;
-
-        do {
-            check=true;
-            number = "VIN-" + String.format("%08d", 11111111 + (int)(Math.random() * 88888888));
-
-            for(Account account:accounts)
-            {
-                if (account.getNumber().equals(number)) {
-                    check = false;
-                    break;
-                }
-            }
-        } while(!check);
-
-        return number;
+         return "VIN-" + String.format("%08d", 11111111 + (int)(Math.random() * 88888888));
     }
 
-    static public String generateCardNumber(List<Card> cards)
+    static public String generateCardNumber()
     {
         String[] cardNumber = new String[4];
-        String number = "";
-        boolean check;
-        do {
-            check=true;
-            for(int i=0;i<4;i++){
+        StringBuilder number = new StringBuilder();
+        for(int i=0;i<4;i++){
                 cardNumber[i] = String.format("%04d", 1000 + (int)(Math.random() * 8999));
-                number += cardNumber[i];
-                if (i<=2) number += "-";
+                number.append(cardNumber[i]);
+                if (i<=2) number.append("-");
             }
-            for(Card card:cards)
-            {
-                if (card.getNumber().equals(number)) {
-                    check = false;
-                    break;
-                }
-            }
-        } while(!check);
-
-        return number;
+        return number.toString();
     }
 }

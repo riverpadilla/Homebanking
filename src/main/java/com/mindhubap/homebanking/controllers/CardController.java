@@ -57,16 +57,19 @@ public class CardController {
             )
     {
         Client client = clientRepository.findByEmail(authentication.getName());
-        int creditCardsCount = 0, debitCardsCount = 0;
 
-        for(Card card:client.getCards()){
-            if(card.getType().equals(CardType.CREDIT)) creditCardsCount++;
-            else debitCardsCount++;
-        }
+        Long creditCardsCount = cardRepository.countByClientAndType(client, CardType.CREDIT);
+        Long debitCardsCount = cardRepository.countByClientAndType(client, CardType.DEBIT);
 
         if ((cardType == CardType.CREDIT && creditCardsCount < 3) || (cardType == CardType.DEBIT && debitCardsCount < 3)){
             String cardHolder = client.getFirstName() + " " + client.getLastName();
-            String number = Utils.generateCardNumber(cardRepository.findAll());
+            String number;
+            boolean check;
+            do{
+                number = Utils.generateCardNumber();
+                check = cardRepository.existsByNumber(number);
+            }while(check);
+
             short cvv = (short)(100 + Math.random() * 899);
             Card card = new Card(cardHolder, cardType, cardColor, number, cvv, LocalDate.now(),LocalDate.now().plusYears(5));
             client.addCard(card);

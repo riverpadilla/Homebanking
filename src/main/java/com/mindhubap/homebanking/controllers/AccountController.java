@@ -54,7 +54,13 @@ public class AccountController {
         Client client = clientRepository.findByEmail(authentication.getName());
 
         if (client.getAccounts().size() < 3) {
-            String number = Utils.generateAccountNumber(accountRepository.findAll());
+            String number;
+            boolean check;
+            do{
+                number = Utils.generateAccountNumber();
+                check = accountRepository.existsByNumber(number);
+            }while(check);
+
             Account account= new Account(number, LocalDate.now(), 0, client);
 
             accountRepository.save(account);

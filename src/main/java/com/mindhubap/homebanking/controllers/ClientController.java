@@ -54,8 +54,15 @@ public class ClientController {
         }
 
         Client client = new Client(firstName, lastName, email, passwordEncoder.encode(password));
-        Account account = new Account("", LocalDate.now(),0);
-        account.setNumber(Utils.generateAccountNumber(accountRepository.findAll()));
+        String number;
+        boolean check;
+        do{
+            number = Utils.generateAccountNumber();
+            check = accountRepository.existsByNumber(number);
+        }while(check);
+
+        Account account = new Account(number, LocalDate.now(),0);
+
         accountRepository.save(account);
         client.addAccount(account);
         clientRepository.save(client);
