@@ -1,5 +1,4 @@
 Vue.createApp({
-
     data() {
         return {
             clientInfo: {},
@@ -15,12 +14,10 @@ Vue.createApp({
                 .then((response) => {
                     //get client ifo
                     this.clientInfo = response.data;
-
                     this.creditCards = this.clientInfo.cards.filter(card => card.type == "CREDIT");
+                    this.creditCards.sort((a, b) => (b.id - a.id));
                     this.debitCards = this.clientInfo.cards.filter(card => card.type == "DEBIT");
-                    this.creditCards.sort((a, b) => parseInt(a.id - b.id))
-                    this.debitCards.sort((a, b) => parseInt(a.id - b.id))
-
+                    this.debitCards.sort((a, b) => (b.id - a.id));
                 })
                 .catch((error) => {
                     this.errorMsg = "Error getting data";

@@ -64,9 +64,9 @@ public class HomebankingApplication {
 
 			//Create Transactions
 			Transaction transaction1 = new Transaction(TransactionType.CREDIT, 1500, "Direct Deposit - Salary", LocalDateTime.now().minusDays(2));
-			Transaction transaction2 = new Transaction(TransactionType.DEBIT, 1600, "Direct Deposit - Interest", LocalDateTime.now().minusDays(1));
+			Transaction transaction2 = new Transaction(TransactionType.DEBIT, -1600, "Direct Deposit - Interest", LocalDateTime.now().minusDays(1));
 			Transaction transaction3 = new Transaction(TransactionType.CREDIT, 1700, "Rent", LocalDateTime.now());
-			Transaction transaction4 = new Transaction(TransactionType.DEBIT, 1800, "Payment", LocalDateTime.now().minusDays(2));
+			Transaction transaction4 = new Transaction(TransactionType.DEBIT, -1800, "Payment", LocalDateTime.now().minusDays(2));
 
 			// Add Transaction to Account
 			account1.addTransaction(transaction1);

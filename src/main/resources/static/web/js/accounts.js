@@ -1,5 +1,4 @@
 Vue.createApp({
-
     data() {
         return {
             clientInfo: {},
@@ -13,8 +12,7 @@ Vue.createApp({
                 .then((response) => {
                     //get client ifo
                     this.clientInfo = response.data;
-                    this.clientInfo.accounts.sort((a, b) => parseInt(a.id - b.id))
-                    this.clientInfo.loans.sort((a, b) => parseInt(a.id - b.id))
+                    this.clientInfo.accounts.sort((a, b) => (b.id - a.id))
                 })
                 .catch((error) => {
                     // handle error
