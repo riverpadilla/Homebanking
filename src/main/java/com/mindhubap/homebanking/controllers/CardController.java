@@ -61,24 +61,33 @@ public class CardController {
         Long creditCardsCount = cardRepository.countByClientAndType(client, CardType.CREDIT);
         Long debitCardsCount = cardRepository.countByClientAndType(client, CardType.DEBIT);
 
-        if ((cardType == CardType.CREDIT && creditCardsCount < 3) || (cardType == CardType.DEBIT && debitCardsCount < 3)){
-            String cardHolder = client.getFirstName() + " " + client.getLastName();
-            String number;
-            boolean check;
-            do{
-                number = Utils.generateCardNumber();
-                check = cardRepository.existsByNumber(number);
-            }while(check);
-
-            short cvv = (short)(100 + Math.random() * 899);
-            Card card = new Card(cardHolder, cardType, cardColor, number, cvv, LocalDate.now(),LocalDate.now().plusYears(5));
-            client.addCard(card);
-            cardRepository.save(card);
-            clientRepository.save(client);
-            return new ResponseEntity<>("Card added to client " + card.getCardHolder(), HttpStatus.CREATED);
+        if (cardType == CardType.CREDIT && creditCardsCount >= 3) {
+        return new ResponseEntity<>("The maximum number of Credit Cards has been reached", HttpStatus.FORBIDDEN);
         }
 
-        return new ResponseEntity<>("The maximum number of cards of the same type has been reached", HttpStatus.FORBIDDEN);
+        if (cardType == CardType.DEBIT && debitCardsCount >= 3) {
+            return new ResponseEntity<>("The maximum number of Debit Cards has been reached", HttpStatus.FORBIDDEN);
+        }
+
+        if (cardRepository.existsByClientAndTypeAndColor(client,cardType,cardColor)){
+            return new ResponseEntity<>("A card with this color currently exists for this type", HttpStatus.FORBIDDEN);
+        }
+
+        String cardHolder = client.getFirstName() + " " + client.getLastName();
+        String number;
+        boolean check;
+        do{
+            number = Utils.generateCardNumber();
+            check = cardRepository.existsByNumber(number);
+        } while(check);
+
+        short cvv = (short)(100 + Math.random() * 899);
+        Card card = new Card(cardHolder, cardType, cardColor, number, cvv, LocalDate.now(),LocalDate.now().plusYears(5));
+        client.addCard(card);
+        cardRepository.save(card);
+        clientRepository.save(client);
+
+        return new ResponseEntity<>("Card added to client " + card.getCardHolder(), HttpStatus.CREATED);
     }
 
 }
