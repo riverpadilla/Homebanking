@@ -1,7 +1,5 @@
 package com.mindhubap.homebanking.controllers;
 
-import com.mindhubap.homebanking.dtos.AccountDTO;
-import com.mindhubap.homebanking.dtos.TransactionDTO;
 import com.mindhubap.homebanking.enums.TransactionType;
 import com.mindhubap.homebanking.models.Account;
 import com.mindhubap.homebanking.models.Client;
@@ -37,31 +35,39 @@ public class TransactionController {
                                                     @RequestParam String toAccountNumber
                                   )
     {
-        if (amount == 0 || description.isEmpty() || fromAccountNumber.isEmpty() || toAccountNumber.isEmpty()) {
-        return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
-        } else if (fromAccountNumber.equals(toAccountNumber)){
+        if (amount == 0)
+            return new ResponseEntity<>("Transaction Amount is Zero", HttpStatus.FORBIDDEN);
+
+
+        if (description.isBlank())
+            return new ResponseEntity<>("Transaction Description is blank", HttpStatus.FORBIDDEN);
+
+        if (fromAccountNumber.isBlank())
+            return new ResponseEntity<>("Origin Account is blank", HttpStatus.FORBIDDEN);
+
+        if (toAccountNumber.isBlank())
+            return new ResponseEntity<>("Destination Account is blank", HttpStatus.FORBIDDEN);
+
+        if (fromAccountNumber.equals(toAccountNumber))
             return new ResponseEntity<>("Origin and Destination Accounts are equals", HttpStatus.FORBIDDEN);
-        }
 
         Account originAccount = accountRepository.findByNumber(fromAccountNumber);
         Account destinationAccount = accountRepository.findByNumber(toAccountNumber);
         Client client = clientRepository.findByEmail(authentication.getName());
 
-        if (originAccount == null){
-            return new ResponseEntity<>("Origin Account Not Exist", HttpStatus.FORBIDDEN);
-        }
-
-        if (destinationAccount == null){
-            return new ResponseEntity<>("destination Account Not Exist", HttpStatus.FORBIDDEN);
-        }
+        if (originAccount == null)
+            return new ResponseEntity<>("Origin Account Does Not Exist", HttpStatus.FORBIDDEN);
 
         if (!client.getAccounts().contains(originAccount)){
-            return new ResponseEntity<>("The Client is not the owner of Origin Account", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("The Client " + client.getEmail()
+                    + " is Not the Owner of Origin Account", HttpStatus.FORBIDDEN);
         }
 
-        if (originAccount.getBalance() < amount){
+        if (destinationAccount == null)
+            return new ResponseEntity<>("destination Account Does Not Exist", HttpStatus.FORBIDDEN);
+
+        if (originAccount.getBalance() < amount)
             return new ResponseEntity<>("Origin Account without enough balance", HttpStatus.FORBIDDEN);
-        }
 
 
         Transaction debitTransaction = new Transaction(TransactionType.DEBIT,-amount,description + " [" + originAccount.getNumber() + "]", LocalDateTime.now());

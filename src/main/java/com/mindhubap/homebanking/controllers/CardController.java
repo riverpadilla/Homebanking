@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 public class CardController {
     @Autowired
     private CardRepository cardRepository;
+
     @Autowired
     private ClientRepository clientRepository;
 
@@ -70,7 +71,10 @@ public class CardController {
         }
 
         if (cardRepository.existsByClientAndTypeAndColor(client,cardType,cardColor)){
-            return new ResponseEntity<>("A card with this color currently exists for this type", HttpStatus.FORBIDDEN);
+            String message = "A card with this color status currently exist for ";
+            if (cardType == CardType.DEBIT) message += "Debit Cards";
+            if (cardType == CardType.CREDIT) message += "Credit Cards";
+            return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
         }
 
         String cardHolder = client.getFirstName() + " " + client.getLastName();

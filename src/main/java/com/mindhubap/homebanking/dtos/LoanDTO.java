@@ -3,7 +3,6 @@ package com.mindhubap.homebanking.dtos;
 
 import com.mindhubap.homebanking.models.Loan;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LoanDTO {

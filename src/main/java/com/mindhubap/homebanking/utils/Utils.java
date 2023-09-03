@@ -1,12 +1,7 @@
 package com.mindhubap.homebanking.utils;
 
-import com.mindhubap.homebanking.models.Account;
-import com.mindhubap.homebanking.models.Card;
-import com.mindhubap.homebanking.repositories.AccountRepository;
-import com.mindhubap.homebanking.repositories.CardRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -26,4 +21,14 @@ public class Utils {
             }
         return number.toString();
     }
+
+     static private final  Pattern EMAIL_PATTERN = Pattern.compile(
+                "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-]{2,6}$"
+        );
+
+    public static boolean isValidEmail(String email) {
+        Matcher matcher = EMAIL_PATTERN.matcher(email);
+        return matcher.matches();
+    }
+
 }

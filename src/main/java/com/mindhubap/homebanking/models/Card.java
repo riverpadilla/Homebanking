@@ -2,7 +2,6 @@ package com.mindhubap.homebanking.models;
 
 import com.mindhubap.homebanking.enums.CardColor;
 import com.mindhubap.homebanking.enums.CardType;
-import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;

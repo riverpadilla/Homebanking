@@ -1,6 +1,5 @@
 package com.mindhubap.homebanking.controllers;
 
-import com.mindhubap.homebanking.dtos.AccountDTO;
 import com.mindhubap.homebanking.dtos.LoanApplicationDTO;
 import com.mindhubap.homebanking.dtos.LoanDTO;
 import com.mindhubap.homebanking.enums.TransactionType;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -35,11 +35,11 @@ public class LoanController {
     @Autowired
     ClientLoanRepository clientLoanRepository;
 
+    @Transactional
     @PostMapping("/loans")
-    public ResponseEntity<Object> createClientLoan(Authentication authentication,
+    public ResponseEntity<String> createClientLoan(Authentication authentication,
                                              @RequestBody LoanApplicationDTO loanApplicationDTO)
     {
-
         Long loanTypeId = loanApplicationDTO.getLoanId();
         double amount = loanApplicationDTO.getAmount();
         Integer payments = loanApplicationDTO.getPayments();
@@ -53,6 +53,9 @@ public class LoanController {
         if(loan == null){
             return new ResponseEntity<>("Loan does not Exist", HttpStatus.FORBIDDEN);
         }
+        if(accountToNumber.isBlank()){
+            return new ResponseEntity<>("Destination Account to credit loan Is Missing", HttpStatus.FORBIDDEN);
+        }
         if(account == null){
             return new ResponseEntity<>("Destination Account to credit loan does Not Exist", HttpStatus.FORBIDDEN);
         }
@@ -65,9 +68,6 @@ public class LoanController {
         }
         if(payments == 0){
             return new ResponseEntity<>("Loan payments Equal to Zero", HttpStatus.FORBIDDEN);
-        }
-            if(accountToNumber.isBlank()){
-            return new ResponseEntity<>("Destination Account to credit loan Is Missing", HttpStatus.FORBIDDEN);
         }
         if(amount > loan.getMaxAmount()){
             return new ResponseEntity<>("Amount requested for the loan exceeds the maximum amount approved",
