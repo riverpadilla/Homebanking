@@ -3,8 +3,8 @@ package com.mindhubap.homebanking.controllers;
 import com.mindhubap.homebanking.dtos.AccountDTO;
 import com.mindhubap.homebanking.models.Account;
 import com.mindhubap.homebanking.models.Client;
-import com.mindhubap.homebanking.repositories.AccountRepository;
-import com.mindhubap.homebanking.repositories.ClientRepository;
+import com.mindhubap.homebanking.services.AccountService;
+import com.mindhubap.homebanking.services.ClientService;
 import com.mindhubap.homebanking.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,26 +22,27 @@ import java.util.stream.Collectors;
 public class AccountController {
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
+
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
 
     @GetMapping("/accounts")
     public List<AccountDTO> getAccounts(){
-        return accountRepository.findAll().stream().map(AccountDTO::new).collect(Collectors.toList());
+        List<Account> accounts = accountService.findAllAccounts();
+        return accountService.convertToAccountsDTO(accounts);
     }
 
     @GetMapping("/accounts/{id}")
     public AccountDTO getAccount(@PathVariable Long id){
-            Account account = accountRepository.findById(id).orElse(null);
-            if(account != null) return new AccountDTO(account);
-            return null;
+            Account account = accountService.findById(id);
+            return new AccountDTO(account);
     }
 
     @GetMapping("/clients/current/accounts")
     public Set<AccountDTO> getCurrentAccounts(Authentication authentication)
     {
-        Client client = clientRepository.findByEmail(authentication.getName());
+        Client client = clientService.findByEmail(authentication.getName());
         return client.getAccounts()
                 .stream()
                 .map(AccountDTO::new)
@@ -51,19 +52,19 @@ public class AccountController {
     @PostMapping("/clients/current/accounts")
     public ResponseEntity<Object> createAccount(Authentication authentication)
     {
-        Client client = clientRepository.findByEmail(authentication.getName());
+        Client client = clientService.findByEmail(authentication.getName());
 
         if (client.getAccounts().size() < 3) {
             String number;
             boolean check;
             do{
                 number = Utils.generateAccountNumber();
-                check = accountRepository.existsByNumber(number);
+                check = accountService.existsByNumber(number);
             }while(check);
 
             Account account= new Account(number, LocalDate.now(), 0, client);
 
-            accountRepository.save(account);
+            accountService.saveAccount(account);
             return new ResponseEntity<>("Account added to client " + account.getClient().getEmail() , HttpStatus.CREATED);
 
         }
@@ -74,8 +75,8 @@ public class AccountController {
     @GetMapping("clients/current/accounts/{id}")
     public AccountDTO getCurrentAccount(Authentication authentication, @PathVariable Long id){
 
-        Client client = clientRepository.findByEmail(authentication.getName());
-        Account account = accountRepository.findById(id).orElse(null);
+        Client client = clientService.findByEmail(authentication.getName());
+        Account account = accountService.findById(id);
         if ((account != null) && (client.getAccounts().contains(account))){
             return new AccountDTO(account);
         }

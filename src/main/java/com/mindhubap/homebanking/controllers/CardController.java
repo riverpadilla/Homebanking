@@ -5,15 +5,14 @@ import com.mindhubap.homebanking.enums.CardColor;
 import com.mindhubap.homebanking.enums.CardType;
 import com.mindhubap.homebanking.models.Card;
 import com.mindhubap.homebanking.models.Client;
-import com.mindhubap.homebanking.repositories.CardRepository;
-import com.mindhubap.homebanking.repositories.ClientRepository;
+import com.mindhubap.homebanking.services.CardService;
+import com.mindhubap.homebanking.services.ClientService;
 import com.mindhubap.homebanking.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,25 +24,26 @@ import java.util.stream.Collectors;
 @RequestMapping("api/")
 public class CardController {
     @Autowired
-    private CardRepository cardRepository;
+    private CardService cardService;
 
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
 
     @GetMapping("/cards")
     public List<CardDTO> getCards(){
-        return cardRepository.findAll().stream().map(CardDTO::new).collect(Collectors.toList());
+        List<Card> cards = cardService.findAllCards();
+        return cardService.convertToCardDTO(cards);
     }
 
     @GetMapping("/cards/{id}")
     public CardDTO getCard(@PathVariable Long id){
-        return cardRepository.findById(id).map(CardDTO::new).orElse(null);
+        return new CardDTO(cardService.findById(id));
     }
 
     @GetMapping("/clients/current/cards")
     public Set<CardDTO> getCurrentCards(Authentication authentication)
     {
-        Client client = clientRepository.findByEmail(authentication.getName());
+        Client client = clientService.findByEmail(authentication.getName());
         return client.getCards()
                 .stream()
                 .map(CardDTO::new)
@@ -57,10 +57,10 @@ public class CardController {
             @RequestParam CardType cardType
             )
     {
-        Client client = clientRepository.findByEmail(authentication.getName());
+        Client client = clientService.findByEmail(authentication.getName());
 
-        Long creditCardsCount = cardRepository.countByClientAndType(client, CardType.CREDIT);
-        Long debitCardsCount = cardRepository.countByClientAndType(client, CardType.DEBIT);
+        Long creditCardsCount = cardService.countByClientAndType(client, CardType.CREDIT);
+        Long debitCardsCount = cardService.countByClientAndType(client, CardType.DEBIT);
 
         if (cardType == CardType.CREDIT && creditCardsCount >= 3) {
         return new ResponseEntity<>("The maximum number of Credit Cards has been reached", HttpStatus.FORBIDDEN);
@@ -70,7 +70,7 @@ public class CardController {
             return new ResponseEntity<>("The maximum number of Debit Cards has been reached", HttpStatus.FORBIDDEN);
         }
 
-        if (cardRepository.existsByClientAndTypeAndColor(client,cardType,cardColor)){
+        if (cardService.existsByClientAndTypeAndColor(client,cardType,cardColor)){
             String message = "A card with this color status currently exist for ";
             if (cardType == CardType.DEBIT) message += "Debit Cards";
             if (cardType == CardType.CREDIT) message += "Credit Cards";
@@ -82,14 +82,14 @@ public class CardController {
         boolean check;
         do{
             number = Utils.generateCardNumber();
-            check = cardRepository.existsByNumber(number);
+            check = cardService.existsByNumber(number);
         } while(check);
 
         short cvv = (short)(100 + Math.random() * 899);
         Card card = new Card(cardHolder, cardType, cardColor, number, cvv, LocalDate.now(),LocalDate.now().plusYears(5));
         client.addCard(card);
-        cardRepository.save(card);
-        clientRepository.save(client);
+        cardService.saveCard(card);
+        clientService.saveClient(client);
 
         return new ResponseEntity<>("Card added to client " + card.getCardHolder(), HttpStatus.CREATED);
     }
