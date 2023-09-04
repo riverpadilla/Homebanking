@@ -4,9 +4,9 @@ import com.mindhubap.homebanking.enums.TransactionType;
 import com.mindhubap.homebanking.models.Account;
 import com.mindhubap.homebanking.models.Client;
 import com.mindhubap.homebanking.models.Transaction;
-import com.mindhubap.homebanking.repositories.AccountRepository;
-import com.mindhubap.homebanking.repositories.ClientRepository;
-import com.mindhubap.homebanking.repositories.TransactionRepository;
+import com.mindhubap.homebanking.services.AccountService;
+import com.mindhubap.homebanking.services.ClientService;
+import com.mindhubap.homebanking.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +19,15 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api")
 public class TransactionController {
+
     @Autowired
-    TransactionRepository transactionRepository;
+    TransactionService transactionService;
+
     @Autowired
-    AccountRepository accountRepository;
+    AccountService accountService;
+
     @Autowired
-    ClientRepository clientRepository;
+    ClientService clientService;
 
     @Transactional
     @PostMapping("/transactions")
@@ -51,9 +54,9 @@ public class TransactionController {
         if (fromAccountNumber.equals(toAccountNumber))
             return new ResponseEntity<>("Origin and Destination Accounts are equals", HttpStatus.FORBIDDEN);
 
-        Account originAccount = accountRepository.findByNumber(fromAccountNumber);
-        Account destinationAccount = accountRepository.findByNumber(toAccountNumber);
-        Client client = clientRepository.findByEmail(authentication.getName());
+        Account originAccount = accountService.findByNumber(fromAccountNumber);
+        Account destinationAccount = accountService.findByNumber(toAccountNumber);
+        Client client = clientService.findByEmail(authentication.getName());
 
         if (originAccount == null)
             return new ResponseEntity<>("Origin Account Does Not Exist", HttpStatus.FORBIDDEN);
@@ -78,10 +81,10 @@ public class TransactionController {
         destinationAccount.addTransaction(creditTransaction);
         originAccount.setBalance(originBalance);
         destinationAccount.setBalance(destinationBalance);
-        accountRepository.save(originAccount);
-        accountRepository.save(destinationAccount);
-        transactionRepository.save(debitTransaction);
-        transactionRepository.save(creditTransaction);
+        accountService.saveAccount(originAccount);
+        accountService.saveAccount(destinationAccount);
+        transactionService.saveTransaction(debitTransaction);
+        transactionService.saveTransaction(creditTransaction);
 
         return new ResponseEntity<>("Transaction successful", HttpStatus.CREATED);
     }

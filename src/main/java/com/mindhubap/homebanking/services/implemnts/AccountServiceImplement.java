@@ -33,6 +33,11 @@ public class AccountServiceImplement implements AccountService {
     }
 
     @Override
+    public Account findByNumber(String number) {
+        return accountRepository.findByNumber(number);
+    }
+
+    @Override
     public boolean existsByNumber(String number) {
         return accountRepository.existsByNumber(number);
     }
