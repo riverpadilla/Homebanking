@@ -1,6 +1,5 @@
 package com.mindhubap.homebanking.dtos;
 
-
 import com.mindhubap.homebanking.models.Loan;
 
 import java.util.List;

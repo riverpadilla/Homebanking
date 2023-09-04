@@ -1,5 +1,4 @@
 package com.mindhubap.homebanking.dtos;
-
 public class LoanApplicationDTO {
 
     private Long loanId;
