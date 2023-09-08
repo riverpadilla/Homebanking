@@ -38,9 +38,8 @@ public class TransactionController {
                                                     @RequestParam String toAccountNumber
                                   )
     {
-        if (amount == 0)
-            return new ResponseEntity<>("Transaction Amount is Zero", HttpStatus.FORBIDDEN);
-
+        if (amount <= 0)
+            return new ResponseEntity<>("Transaction Amount is less or equal to Zero", HttpStatus.FORBIDDEN);
 
         if (description.isBlank())
             return new ResponseEntity<>("Transaction Description is blank", HttpStatus.FORBIDDEN);

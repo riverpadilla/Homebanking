@@ -65,11 +65,11 @@ public class LoanController {
             return new ResponseEntity<>("Authenticated Client is Not Owner of Destination Account",
                     HttpStatus.FORBIDDEN);
         }
-        if(amount == 0){
-            return new ResponseEntity<>("Loan value Equal to Zero", HttpStatus.FORBIDDEN);
+        if(amount <= 0){
+            return new ResponseEntity<>("Loan value Less or Equal to Zero", HttpStatus.FORBIDDEN);
         }
-        if(payments == 0){
-            return new ResponseEntity<>("Loan payments Equal to Zero", HttpStatus.FORBIDDEN);
+        if(payments <= 0){
+            return new ResponseEntity<>("Loan payments Less or Equal to Zero", HttpStatus.FORBIDDEN);
         }
         if(amount > loan.getMaxAmount()){
             return new ResponseEntity<>("Amount requested for the loan exceeds the maximum amount approved",
