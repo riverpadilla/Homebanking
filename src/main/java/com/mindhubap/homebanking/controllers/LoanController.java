@@ -4,7 +4,6 @@ import com.mindhubap.homebanking.dtos.LoanApplicationDTO;
 import com.mindhubap.homebanking.dtos.LoanDTO;
 import com.mindhubap.homebanking.enums.TransactionType;
 import com.mindhubap.homebanking.models.*;
-import com.mindhubap.homebanking.repositories.*;
 import com.mindhubap.homebanking.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")

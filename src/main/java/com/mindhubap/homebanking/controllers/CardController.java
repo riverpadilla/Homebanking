@@ -71,7 +71,7 @@ public class CardController {
         }
 
         if (cardService.existsByClientAndTypeAndColor(client,cardType,cardColor)){
-            String message = "A card with this color status currently exist for ";
+            String message = "A card with this color status currently exist in ";
             if (cardType == CardType.DEBIT) message += "Debit Cards";
             if (cardType == CardType.CREDIT) message += "Credit Cards";
             return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
@@ -91,7 +91,32 @@ public class CardController {
         cardService.saveCard(card);
         clientService.saveClient(client);
 
-        return new ResponseEntity<>("Card added to client " + card.getCardHolder(), HttpStatus.CREATED);
+        String message = "";
+
+        switch (cardType){
+            case CREDIT:
+                message = "Credit Card ";
+                break;
+            case DEBIT:
+                message = "Debit Card ";
+                break;
+        }
+
+        switch (cardColor){
+            case SILVER:
+                message += "Silver ";
+                break;
+            case GOLD:
+                message += "Gold ";
+                break;
+            case TITANIUM:
+                message += "Titanium ";
+                break;
+        }
+
+        message += "Added to Client " + card.getCardHolder();
+
+        return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
 
 }
