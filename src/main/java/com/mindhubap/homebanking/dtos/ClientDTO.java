@@ -1,6 +1,5 @@
 package com.mindhubap.homebanking.dtos;
 
-import com.mindhubap.homebanking.models.Card;
 import com.mindhubap.homebanking.models.Client;
 
 import java.util.List;
