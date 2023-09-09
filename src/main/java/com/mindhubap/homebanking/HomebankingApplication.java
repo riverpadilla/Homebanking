@@ -25,20 +25,21 @@ public class HomebankingApplication {
 		SpringApplication.run(HomebankingApplication.class, args);
 	}
 
-	@Bean
-	public CommandLineRunner initData(ClientRepository clientRepository,
+//	@Bean
+/*	public CommandLineRunner initData(ClientRepository clientRepository,
 									  AccountRepository accountRepository,
 									  TransactionRepository transactionRepository,
 									  LoanRepository loanRepository,
 									  ClientLoanRepository clientLoanRepository,
 									  CardRepository cardRepository) {
 		return (args) -> {
+
 			//create Clients
 			Client client1 = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("123456"));
 			Client client2 = new Client("Rivelino", "Padilla", "riverpadilla@msn.com", passwordEncoder.encode("654321"));
+
 			//Create Admin
 			Client admin = new Client("Admin", "SU", "admin@mindhub.com", passwordEncoder.encode("Admin"));
-
 
 			//Save Clients in DB
 			clientRepository.save(admin);
@@ -55,12 +56,9 @@ public class HomebankingApplication {
 			client1.addAccount(account1);
 			client2.addAccount(account2);
 
-
 			// Save account in DB
 			accountRepository.save(account1);
 			accountRepository.save(account2);
-
-
 
 			//Create Transactions
 			Transaction transaction1 = new Transaction(TransactionType.CREDIT, 1500, "Direct Deposit - Salary", LocalDateTime.now().minusDays(2));
@@ -79,7 +77,6 @@ public class HomebankingApplication {
 			transactionRepository.save(transaction2);
 			transactionRepository.save(transaction3);
 			transactionRepository.save(transaction4);
-
 
 			// Create Loads
 			Loan loan1 = new Loan("Mortgage", 500000, List.of(12, 24, 36, 48, 60));
@@ -131,7 +128,6 @@ public class HomebankingApplication {
 			cardRepository.save(card1);
 			cardRepository.save(card2);
 			cardRepository.save(card3);
-
 		};
-	}
+	}*/
 }
