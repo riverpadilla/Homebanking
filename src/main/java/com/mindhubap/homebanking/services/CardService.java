@@ -7,6 +7,7 @@ import com.mindhubap.homebanking.models.Card;
 import com.mindhubap.homebanking.models.Client;
 
 import java.util.List;
+import java.util.Set;
 
 public interface CardService {
 
@@ -16,7 +17,7 @@ public interface CardService {
 
     Card findByNumber(String number);
 
-    List<CardDTO> convertToCardDTO(List<Card> cards);
+    Set<CardDTO> convertToCardDTO(List<Card> cards);
 
     Long countByClientAndType(Client client, CardType cardType);
 
@@ -24,6 +25,7 @@ public interface CardService {
 
     boolean existsByNumber(String number);
 
-
     void saveCard(Card card);
+
+    void deleteCard(Card card);
 }

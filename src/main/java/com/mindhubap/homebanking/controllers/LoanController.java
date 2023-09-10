@@ -1,5 +1,6 @@
 package com.mindhubap.homebanking.controllers;
 
+import com.mindhubap.homebanking.dtos.ClientLoanDTO;
 import com.mindhubap.homebanking.dtos.LoanApplicationDTO;
 import com.mindhubap.homebanking.dtos.LoanDTO;
 import com.mindhubap.homebanking.enums.TransactionType;
@@ -13,8 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -35,10 +38,40 @@ public class LoanController {
     @Autowired
     ClientLoanService clientLoanService;
 
+    @GetMapping("/loans/all")
+    public ResponseEntity<Object> getAllLoans(){
+        List<ClientLoan> clientLoans = clientLoanService.findAll();
+
+        if (clientLoans.isEmpty()){
+            return new ResponseEntity<>("Database does not contains loans", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(clientLoanService.convertToClientLoadDTO(clientLoans),HttpStatus.OK);
+    }
+
+    @GetMapping("/loans/{id}")
+    public ResponseEntity<Object> getLoan(@PathVariable Long id){
+        ClientLoan clientLoan = clientLoanService.findById(id);
+        if (clientLoan == null){
+            return new ResponseEntity<>("Loan does not Exist", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(new ClientLoanDTO(clientLoan),HttpStatus.OK);
+    }
+
+    @GetMapping("/clients/current/loans")
+    public ResponseEntity<Object> getClientLoan(Authentication authentication){
+
+        Client client = clientService.findByEmail(authentication.getName());
+
+        if (client.getLoans() == null){
+            return new ResponseEntity<>("`Client " + client.getEmail() + "does not have loans", HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(clientLoanService.convertToClientLoadDTO(new ArrayList<>(client.getLoans())),HttpStatus.OK);
+    }
+
     @Transactional
-    @PostMapping("/loans")
+    @PostMapping("/clients/current/loans")
     public ResponseEntity<String> createClientLoan(Authentication authentication,
-                                             @RequestBody LoanApplicationDTO loanApplicationDTO)
+                                                   @RequestBody LoanApplicationDTO loanApplicationDTO)
     {
         Long loanTypeId = loanApplicationDTO.getLoanId();
         double amount = loanApplicationDTO.getAmount();
@@ -79,7 +112,7 @@ public class LoanController {
         }
 
         double accountBalance = account.getBalance() + loanApplicationDTO.getAmount();
-        Transaction transaction = new Transaction(TransactionType.CREDIT, amount,loan.getName() + " Loan Approved", LocalDateTime.now());
+        Transaction transaction = new Transaction(TransactionType.CREDIT, amount,loan.getName() + " Loan Approved", LocalDateTime.now(), accountBalance);
 
         ClientLoan clientLoan = new ClientLoan(1.2 * loanApplicationDTO.getAmount(), loanApplicationDTO.getPayments());
         client.addLoan(clientLoan);

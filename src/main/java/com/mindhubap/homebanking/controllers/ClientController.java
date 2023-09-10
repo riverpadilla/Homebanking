@@ -1,6 +1,7 @@
 package com.mindhubap.homebanking.controllers;
 
 
+import com.mindhubap.homebanking.dtos.CardDTO;
 import com.mindhubap.homebanking.dtos.ClientDTO;
 
 import com.mindhubap.homebanking.models.Account;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -33,12 +35,25 @@ public class ClientController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @GetMapping("/clients")
-    public List<ClientDTO> getClients(){
+    @GetMapping("/clients/all")
+    public ResponseEntity<Object> getClients()
+    {
         List<Client> clients = clientService.findAllClients();
-        return clientService.convertToClientsDTO(clients);
+        if (clients.isEmpty()){
+            return new ResponseEntity<>("Database does not contains clients", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(clientService.convertToClientsDTO(clients), HttpStatus.OK);
 
-//        return clientRepository.findAll().stream().map(ClientDTO::new).collect(Collectors.toList());
+    }
+
+    @GetMapping("/clients/{id}")
+    public ResponseEntity<Object> getClient(@PathVariable Long id)
+    {
+        Client client = clientService.findById(id);
+        if (client == null){
+            return new ResponseEntity<>("Client does not Exist", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(new ClientDTO(client), HttpStatus.OK);
     }
 
     @PostMapping("/clients")
@@ -88,14 +103,15 @@ public class ClientController {
         return new ResponseEntity<>("Client " + client.getEmail() + " was created",HttpStatus.CREATED);
     }
 
-    @GetMapping("/clients/{id}")
-    public ClientDTO getClient(@PathVariable Long id){
-        return new ClientDTO(clientService.findById(id));
-    }
-
     @GetMapping("/clients/current")
-    public ClientDTO getCurrentClient(Authentication authentication){
-        return new ClientDTO(clientService.findByEmail(authentication.getName()));
+    public ResponseEntity<Object> getCurrentClient(Authentication authentication)
+    {
+        Client client = clientService.findByEmail(authentication.getName());
+        if (client == null){
+            return new ResponseEntity<>("Client does not Exist", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(new ClientDTO(client), HttpStatus.OK);
+
     }
 }
 

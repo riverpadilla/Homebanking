@@ -27,7 +27,7 @@ public class AccountController {
     @Autowired
     private ClientService clientService;
 
-    @GetMapping("/accounts")
+    @GetMapping("/accounts/all")
     public List<AccountDTO> getAccounts(){
         List<Account> accounts = accountService.findAllAccounts();
         return accountService.convertToAccountsDTO(accounts);
@@ -73,14 +73,18 @@ public class AccountController {
     }
 
     @GetMapping("clients/current/accounts/{id}")
-    public AccountDTO getCurrentAccount(Authentication authentication, @PathVariable Long id){
+    public ResponseEntity<Object> getCurrentAccount(Authentication authentication, @PathVariable Long id){
 
         Client client = clientService.findByEmail(authentication.getName());
         Account account = accountService.findById(id);
-        if ((account != null) && (client.getAccounts().contains(account))){
-            return new AccountDTO(account);
+        if (account == null){
+            return new ResponseEntity<>("Account does not exist",HttpStatus.BAD_REQUEST);
         }
-        return null;
+        if (!client.getAccounts().contains(account)){
+            return new ResponseEntity<>("Authenticated Client is not Owner of this Account",HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>(new AccountDTO(account),HttpStatus.OK);
     }
 
 }

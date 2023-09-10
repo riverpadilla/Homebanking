@@ -1,5 +1,7 @@
 package com.mindhubap.homebanking.controllers;
 
+import com.mindhubap.homebanking.dtos.AccountDTO;
+import com.mindhubap.homebanking.dtos.TransactionDTO;
 import com.mindhubap.homebanking.enums.TransactionType;
 import com.mindhubap.homebanking.models.Account;
 import com.mindhubap.homebanking.models.Client;
@@ -15,6 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
@@ -29,8 +35,39 @@ public class TransactionController {
     @Autowired
     ClientService clientService;
 
+
+    @GetMapping("/transactions/all")
+    public List<TransactionDTO> getAllTransactions(){
+       List<Transaction> transactions = transactionService.findAllTransactions();
+       return transactionService.convertToTransactionDTO(transactions);
+    }
+
+    @GetMapping("/transactions/{id}")
+    public ResponseEntity<Object> getTransaction(@PathVariable Long id){
+        Transaction transaction = transactionService.findById(id);
+        if (transaction == null){
+            return new ResponseEntity<>("Transaction does not Exist",HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(new TransactionDTO(transaction),HttpStatus.OK);
+    }
+
+    @GetMapping("clients/current/transactions")
+    public ResponseEntity<Object> createTransaction(Authentication authentication){
+        Client client = clientService.findByEmail(authentication.getName());
+
+        if (client.getAccounts().isEmpty()){
+            return new ResponseEntity<>("`Client " + client.getEmail() + " don't have accounts", HttpStatus.BAD_REQUEST);
+        }
+        Set<Transaction> transactions = new HashSet<>();
+        for (Account account:client.getAccounts()){
+            transactions.addAll(account.getTransactions());
+        }
+
+        return new ResponseEntity<>(transactionService.convertToTransactionDTO(new ArrayList<>(transactions)),HttpStatus.OK);
+    }
+
     @Transactional
-    @PostMapping("/transactions")
+    @PostMapping("clients/current/transactions")
     public ResponseEntity<Object> createTransaction(Authentication authentication,
                                                     @RequestParam double amount,
                                                     @RequestParam String description,
@@ -72,10 +109,12 @@ public class TransactionController {
             return new ResponseEntity<>("Origin Account without enough balance", HttpStatus.FORBIDDEN);
 
 
-        Transaction debitTransaction = new Transaction(TransactionType.DEBIT,-amount,description + " [" + originAccount.getNumber() + "]", LocalDateTime.now());
-        Transaction creditTransaction = new Transaction(TransactionType.CREDIT,amount,description + " [" + destinationAccount.getNumber() + "]", LocalDateTime.now());
         double originBalance = originAccount.getBalance() - amount;
         double destinationBalance = (destinationAccount.getBalance() + amount);
+        Transaction debitTransaction = new Transaction(TransactionType.DEBIT,-amount,description
+                + " [" + originAccount.getNumber() + "]", LocalDateTime.now(), originBalance);
+        Transaction creditTransaction = new Transaction(TransactionType.CREDIT,amount,description
+                + " [" + destinationAccount.getNumber() + "]", LocalDateTime.now(), destinationBalance);
         originAccount.addTransaction(debitTransaction);
         destinationAccount.addTransaction(creditTransaction);
         originAccount.setBalance(originBalance);

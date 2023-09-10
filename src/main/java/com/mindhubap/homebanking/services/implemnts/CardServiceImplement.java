@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,8 +35,8 @@ public class CardServiceImplement implements CardService {
     }
 
     @Override
-    public List<CardDTO> convertToCardDTO(List<Card> cards) {
-        return cards.stream().map(CardDTO :: new).collect(Collectors.toList());
+    public Set<CardDTO> convertToCardDTO(List<Card> cards) {
+        return cards.stream().map(CardDTO :: new).collect(Collectors.toSet());
     }
 
     @Override
@@ -56,5 +57,10 @@ public class CardServiceImplement implements CardService {
     @Override
     public void saveCard(Card card) {
         cardRepository.save(card);
+    }
+
+    @Override
+    public void deleteCard(Card card) {
+        cardRepository.delete(card);
     }
 }

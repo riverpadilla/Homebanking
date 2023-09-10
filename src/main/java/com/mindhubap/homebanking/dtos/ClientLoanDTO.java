@@ -8,6 +8,8 @@ public class ClientLoanDTO {
 
     private Long loanId;
 
+    private long clientId;
+
     private String name;
 
     private double amount;
@@ -17,6 +19,7 @@ public class ClientLoanDTO {
     public ClientLoanDTO(ClientLoan clientLoan) {
         id = clientLoan.getId();
         loanId = clientLoan.getLoan().getId();
+        clientId = clientLoan.getClient().getId();
         name = clientLoan.getLoan().getName();
         amount = clientLoan.getAmount();
         payments = clientLoan.getPayments();
@@ -28,6 +31,10 @@ public class ClientLoanDTO {
 
     public Long getLoanId() {
         return loanId;
+    }
+
+    public long getClientId() {
+        return clientId;
     }
 
     public String getName() {

@@ -25,7 +25,7 @@ public class AccountServiceImplement implements AccountService {
     @Override
     public List<AccountDTO> convertToAccountsDTO(List<Account> accounts) {
 
-        return accounts.stream().map(AccountDTO:: new).collect(Collectors.toList());
+        return accounts.stream().map(AccountDTO::new).collect(Collectors.toList());
     }
 
     @Override
