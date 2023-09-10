@@ -3,14 +3,14 @@ package com.mindhubap.homebanking.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Utils {
+final public class Utils {
 
-    static public String generateAccountNumber()
+    public static String generateAccountNumber()
     {
          return "VIN-" + String.format("%08d", 11111111 + (int)(Math.random() * 88888888));
     }
 
-    static public String generateCardNumber()
+    public static String generateCardNumber()
     {
         String[] cardNumber = new String[4];
         StringBuilder number = new StringBuilder();
@@ -22,13 +22,19 @@ public class Utils {
         return number.toString();
     }
 
-     static private final  Pattern EMAIL_PATTERN = Pattern.compile(
+     private static final  Pattern EMAIL_PATTERN = Pattern.compile(
                 "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-]{2,6}$"
         );
+
+    public static short generateCvv() {
+        return (short) (100 + Math.random() * 899);
+    }
 
     public static boolean isValidEmail(String email) {
         Matcher matcher = EMAIL_PATTERN.matcher(email);
         return matcher.matches();
     }
+
+
 
 }

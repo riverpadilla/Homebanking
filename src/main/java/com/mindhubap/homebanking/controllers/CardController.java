@@ -85,7 +85,7 @@ public class CardController {
             check = cardService.existsByNumber(number);
         } while(check);
 
-        short cvv = (short)(100 + Math.random() * 899);
+        short cvv = Utils.generateCvv();
         Card card = new Card(cardHolder, cardType, cardColor, number, cvv, LocalDate.now(),LocalDate.now().plusYears(5));
         client.addCard(card);
         cardService.saveCard(card);
@@ -118,5 +118,7 @@ public class CardController {
 
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
+
+
 
 }

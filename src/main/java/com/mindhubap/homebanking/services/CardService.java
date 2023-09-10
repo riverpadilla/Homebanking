@@ -14,6 +14,8 @@ public interface CardService {
 
     Card findById(Long id);
 
+    Card findByNumber(String number);
+
     List<CardDTO> convertToCardDTO(List<Card> cards);
 
     Long countByClientAndType(Client client, CardType cardType);
@@ -21,6 +23,7 @@ public interface CardService {
     boolean existsByClientAndTypeAndColor( Client client,CardType cardType, CardColor cardColor);
 
     boolean existsByNumber(String number);
+
 
     void saveCard(Card card);
 }

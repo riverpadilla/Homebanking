@@ -29,6 +29,11 @@ public class CardServiceImplement implements CardService {
     }
 
     @Override
+    public Card findByNumber(String number) {
+        return cardRepository.findByNumber(number);
+    }
+
+    @Override
     public List<CardDTO> convertToCardDTO(List<Card> cards) {
         return cards.stream().map(CardDTO :: new).collect(Collectors.toList());
     }

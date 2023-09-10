@@ -9,8 +9,12 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource
 public interface CardRepository extends JpaRepository<Card, Long> {
+
     boolean existsByNumber(String number);
+
     boolean existsByClientAndTypeAndColor(Client client, CardType type, CardColor color);
+
+    Card findByNumber(String number);
 
     Long countByClientAndType(Client client,CardType type);
 
