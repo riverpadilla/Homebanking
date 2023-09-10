@@ -14,4 +14,6 @@ public interface TransactionService {
     Transaction findById(Long id);
 
     void saveTransaction(Transaction transaction);
+
+    void deleteTransaction(Transaction transaction);
 }

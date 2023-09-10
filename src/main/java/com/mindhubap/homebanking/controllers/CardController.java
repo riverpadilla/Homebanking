@@ -51,9 +51,7 @@ public class CardController {
     }
 
     @PostMapping("/cards/delete")
-    public ResponseEntity<Object> deleteCard(
-            @RequestParam Long id
-    )
+    public ResponseEntity<Object> deleteCard(@RequestParam Long id)
     {
         Card card = cardService.findById(id);
 
@@ -126,7 +124,7 @@ public class CardController {
     }
 
     @PostMapping("/clients/current/cards/delete")
-    public ResponseEntity<Object> deleteCard(
+    public ResponseEntity<Object> deleteCurrentCard(
             Authentication authentication,
             @RequestParam Long id
             )

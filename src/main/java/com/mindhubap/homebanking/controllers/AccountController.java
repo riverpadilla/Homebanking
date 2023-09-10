@@ -2,9 +2,12 @@ package com.mindhubap.homebanking.controllers;
 
 import com.mindhubap.homebanking.dtos.AccountDTO;
 import com.mindhubap.homebanking.models.Account;
+import com.mindhubap.homebanking.models.Card;
 import com.mindhubap.homebanking.models.Client;
+import com.mindhubap.homebanking.models.Transaction;
 import com.mindhubap.homebanking.services.AccountService;
 import com.mindhubap.homebanking.services.ClientService;
+import com.mindhubap.homebanking.services.TransactionService;
 import com.mindhubap.homebanking.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,9 @@ import java.util.stream.Collectors;
 public class AccountController {
 
     @Autowired
+    private TransactionService transactionService;
+
+    @Autowired
     private AccountService accountService;
 
     @Autowired
@@ -37,6 +43,26 @@ public class AccountController {
     public AccountDTO getAccount(@PathVariable Long id){
             Account account = accountService.findById(id);
             return new AccountDTO(account);
+    }
+
+    @PostMapping("/accounts/delete")
+    public ResponseEntity<Object> deleteAccount(@RequestParam Long id)
+    {
+        Account account = accountService.findById(id);
+
+        if (account == null){
+            return new ResponseEntity<>("Account not exist", HttpStatus.BAD_REQUEST);
+        }
+        if (account.getBalance() > 0){
+            return new ResponseEntity<>("The balance for the account to be deleted is greater than zero", HttpStatus.BAD_REQUEST);
+        }
+        if (!account.getTransactions().isEmpty()){
+            for(Transaction transaction:account.getTransactions()){
+                transactionService.deleteTransaction(transaction);
+            }
+        }
+        accountService.deleteAccount(account);
+        return new ResponseEntity<>("Account has been Deleted", HttpStatus.OK);
     }
 
     @GetMapping("/clients/current/accounts")
@@ -87,4 +113,31 @@ public class AccountController {
         return new ResponseEntity<>(new AccountDTO(account),HttpStatus.OK);
     }
 
+    @PostMapping("/clients/current/accounts/delete")
+    public ResponseEntity<Object> deleteCurrentAccount(
+            Authentication authentication,
+            @RequestParam Long id
+    )
+    {
+        Client client = clientService.findByEmail(authentication.getName());
+        Account account = accountService.findById(id);
+
+        if (account == null){
+            return new ResponseEntity<>("Account not exist", HttpStatus.BAD_REQUEST);
+        }
+        if (!client.getAccounts().contains(account)){
+            return new ResponseEntity<>("The Client " + client.getEmail()
+                    + " is Not the Owner of account to be deleted", HttpStatus.FORBIDDEN);
+        }
+        if (account.getBalance() > 0){
+            return new ResponseEntity<>("The balance for the account to be deleted is greater than zero", HttpStatus.BAD_REQUEST);
+        }
+        if (!account.getTransactions().isEmpty()){
+            for(Transaction transaction:account.getTransactions()){
+                transactionService.deleteTransaction(transaction);
+            }
+        }
+        accountService.deleteAccount(account);
+        return new ResponseEntity<>("Account has been Deleted", HttpStatus.OK);
+    }
 }

@@ -36,4 +36,9 @@ public class TransactionServiceImplement implements TransactionService {
     public void saveTransaction(Transaction transaction) {
         transactionRepository.save(transaction);
     }
+
+    @Override
+    public void deleteTransaction(Transaction transaction) {
+        transactionRepository.delete(transaction);
+    }
 }

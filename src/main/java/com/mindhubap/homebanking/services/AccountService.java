@@ -23,4 +23,6 @@ public interface AccountService {
 
     void saveAccount(Account account);
 
+    void deleteAccount(Account account);
+
 }
