@@ -33,7 +33,13 @@ public class Card {
     @JoinColumn(name = "Client_ID")
     private Client client;
 
-    public Card() {
+      public Card() {
+    }
+
+    public Card(String cardHolder, CardType type, CardColor color) {
+        this.cardHolder = cardHolder;
+        this.type = type;
+        this.color = color;
     }
 
     public Card(String cardHolder,

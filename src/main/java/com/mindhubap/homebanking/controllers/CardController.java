@@ -2,6 +2,7 @@ package com.mindhubap.homebanking.controllers;
 
 import com.mindhubap.homebanking.dtos.CardDTO;
 import com.mindhubap.homebanking.enums.CardColor;
+import com.mindhubap.homebanking.enums.CardException;
 import com.mindhubap.homebanking.enums.CardType;
 import com.mindhubap.homebanking.models.Card;
 import com.mindhubap.homebanking.models.Client;
@@ -18,6 +19,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.mindhubap.homebanking.utils.Utils.*;
 
 
 @RestController
@@ -57,64 +60,44 @@ public class CardController {
             @RequestParam CardType cardType
             )
     {
+        String message;
+
         Client client = clientService.findByEmail(authentication.getName());
+        String cardHolder = client.getFirstName() + " " + client.getLastName();
+        Card card = new Card(cardHolder, cardType,cardColor);
 
         Long creditCardsCount = cardService.countByClientAndType(client, CardType.CREDIT);
         Long debitCardsCount = cardService.countByClientAndType(client, CardType.DEBIT);
 
         if (cardType == CardType.CREDIT && creditCardsCount >= 3) {
-        return new ResponseEntity<>("The maximum number of Credit Cards has been reached", HttpStatus.FORBIDDEN);
+            message = cardExceptionMessage(CardException.MAX_QTY_CREDIT,card);
+        return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
         }
 
         if (cardType == CardType.DEBIT && debitCardsCount >= 3) {
-            return new ResponseEntity<>("The maximum number of Debit Cards has been reached", HttpStatus.FORBIDDEN);
-        }
-
-        if (cardService.existsByClientAndTypeAndColor(client,cardType,cardColor)){
-            String message = "A card with this color status currently exist in ";
-            if (cardType == CardType.DEBIT) message += "Debit Cards";
-            if (cardType == CardType.CREDIT) message += "Credit Cards";
+            message = cardExceptionMessage(CardException.MAX_QTY_DEBIT,card);
             return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
         }
 
-        String cardHolder = client.getFirstName() + " " + client.getLastName();
+        if (cardService.existsByClientAndTypeAndColor(client,cardType,cardColor)){
+            message = cardExceptionMessage(CardException.EXIST,card);
+            return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
+        }
+
         String number;
         boolean check;
         do{
-            number = Utils.generateCardNumber();
+            number = generateCardNumber();
             check = cardService.existsByNumber(number);
         } while(check);
 
-        short cvv = Utils.generateCvv();
-        Card card = new Card(cardHolder, cardType, cardColor, number, cvv, LocalDate.now(),LocalDate.now().plusYears(5));
+        short cvv = generateCvv();
+        card = new Card(cardHolder, cardType, cardColor, number, cvv, LocalDate.now(),LocalDate.now().plusYears(5));
         client.addCard(card);
         cardService.saveCard(card);
         clientService.saveClient(client);
 
-        String message = "";
-
-        switch (cardType){
-            case CREDIT:
-                message = "Credit Card ";
-                break;
-            case DEBIT:
-                message = "Debit Card ";
-                break;
-        }
-
-        switch (cardColor){
-            case SILVER:
-                message += "Silver ";
-                break;
-            case GOLD:
-                message += "Gold ";
-                break;
-            case TITANIUM:
-                message += "Titanium ";
-                break;
-        }
-
-        message += "Added to Client " + card.getCardHolder();
+        message = cardExceptionMessage(CardException.CREATED,card);
 
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
