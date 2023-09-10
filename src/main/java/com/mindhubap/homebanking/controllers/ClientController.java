@@ -4,6 +4,7 @@ package com.mindhubap.homebanking.controllers;
 import com.mindhubap.homebanking.dtos.CardDTO;
 import com.mindhubap.homebanking.dtos.ClientDTO;
 
+import com.mindhubap.homebanking.enums.AccountType;
 import com.mindhubap.homebanking.models.Account;
 import com.mindhubap.homebanking.models.Client;
 import com.mindhubap.homebanking.services.AccountService;
@@ -94,7 +95,7 @@ public class ClientController {
             check = accountService.existsByNumber(number);
         }while(check);
 
-        Account account = new Account(number, LocalDate.now(),0);
+        Account account = new Account(number, LocalDate.now(),0, AccountType.SAVING);
 
         accountService.saveAccount(account);
         client.addAccount(account);

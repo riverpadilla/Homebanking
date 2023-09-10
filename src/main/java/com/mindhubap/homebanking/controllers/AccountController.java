@@ -1,6 +1,7 @@
 package com.mindhubap.homebanking.controllers;
 
 import com.mindhubap.homebanking.dtos.AccountDTO;
+import com.mindhubap.homebanking.enums.AccountType;
 import com.mindhubap.homebanking.models.Account;
 import com.mindhubap.homebanking.models.Card;
 import com.mindhubap.homebanking.models.Client;
@@ -76,7 +77,7 @@ public class AccountController {
     }
 
     @PostMapping("/clients/current/accounts")
-    public ResponseEntity<Object> createAccount(Authentication authentication)
+    public ResponseEntity<Object> createAccount(Authentication authentication, @RequestParam AccountType type)
     {
         Client client = clientService.findByEmail(authentication.getName());
 
@@ -88,7 +89,7 @@ public class AccountController {
                 check = accountService.existsByNumber(number);
             }while(check);
 
-            Account account= new Account(number, LocalDate.now(), 0, client);
+            Account account= new Account(number, LocalDate.now(), 0, type, client);
 
             accountService.saveAccount(account);
             return new ResponseEntity<>("Account added to client " + account.getClient().getEmail() , HttpStatus.CREATED);
