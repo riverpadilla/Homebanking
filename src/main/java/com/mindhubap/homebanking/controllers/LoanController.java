@@ -134,4 +134,33 @@ public class LoanController {
         List<Loan> loans = loanService.findAll();
         return loanService.convertToLoanDTO(loans);
     }
+
+    @PostMapping("/loans/create")
+    public ResponseEntity<String> createLoan(
+            @RequestParam String name,
+            @RequestParam double maxAmount,
+            @RequestParam double interest,
+            @RequestBody List<Integer> payments
+    )
+    {
+        Loan loan = new Loan(name,maxAmount,interest,payments);
+
+        if (name.isBlank()){
+            return new ResponseEntity<>("Loan name is blank", HttpStatus.FORBIDDEN);
+        }
+        if (maxAmount <= 0){
+            return new ResponseEntity<>("Loan Max Amount Less or Equal to Zero", HttpStatus.FORBIDDEN);
+        }
+        if ( interest <= 0){
+            return new ResponseEntity<>("Loan Interest Less or Equal to Zero", HttpStatus.FORBIDDEN);
+        }
+        if (payments.isEmpty()){
+            return new ResponseEntity<>("Loan payments is Empty", HttpStatus.FORBIDDEN);
+        }
+        if (loanService.existsByName(name)){
+            return new ResponseEntity<>("Loan with same name already exists",HttpStatus.BAD_REQUEST);
+        }
+        loanService.saveLoan(loan);
+        return new ResponseEntity<>("New Loan type has been Created",HttpStatus.CREATED);
+    }
 }
