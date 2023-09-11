@@ -1,20 +1,28 @@
 package com.mindhubap.homebanking.controllers;
 
 import com.mindhubap.homebanking.dtos.CardDTO;
+import com.mindhubap.homebanking.dtos.CardPaymentDTO;
 import com.mindhubap.homebanking.enums.CardColor;
 import com.mindhubap.homebanking.enums.CardException;
 import com.mindhubap.homebanking.enums.CardType;
+import com.mindhubap.homebanking.enums.TransactionType;
+import com.mindhubap.homebanking.models.Account;
 import com.mindhubap.homebanking.models.Card;
 import com.mindhubap.homebanking.models.Client;
+import com.mindhubap.homebanking.models.Transaction;
+import com.mindhubap.homebanking.services.AccountService;
 import com.mindhubap.homebanking.services.CardService;
 import com.mindhubap.homebanking.services.ClientService;
+import com.mindhubap.homebanking.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +32,15 @@ import static com.mindhubap.homebanking.utils.Utils.*;
 @RestController
 @RequestMapping("api/")
 public class CardController {
+
     @Autowired
     private CardService cardService;
+
+    @Autowired
+    AccountService accountService;
+
+    @Autowired
+    TransactionService transactionService;
 
     @Autowired
     private ClientService clientService;
@@ -62,6 +77,59 @@ public class CardController {
         cardService.deleteCard(card);
         return new ResponseEntity<>("Card has been Deleted", HttpStatus.OK);
     }
+
+    @Transactional
+    @PostMapping("/cards/postnet")
+    public ResponseEntity<Object> paymentWithCard(@RequestBody CardPaymentDTO cardPaymentDTO)
+    {
+        String number = cardPaymentDTO.getNumber();
+        short cvv = cardPaymentDTO.getCvv();
+        double amount = cardPaymentDTO.getAmount();
+        String description = cardPaymentDTO.getDescription();
+        Account linkedAccount = null;
+
+        Card card = cardService.findByNumber(number);
+        if (card == null){
+            return new ResponseEntity<>("Card with number sent Does Not Exists", HttpStatus.FORBIDDEN);
+        }
+        if (card.getCvv() != cvv){
+            return new ResponseEntity<>("Card Verification Value Incorrect", HttpStatus.FORBIDDEN);
+        }
+        if (card.getThruDate().isBefore(LocalDate.now())){
+            return new ResponseEntity<>("Card Expired in " + card.getThruDate(), HttpStatus.FORBIDDEN);
+        }
+        if (amount <= 0){
+            return new ResponseEntity<>("Payment Amount is Less or Equal to Zero", HttpStatus.FORBIDDEN);
+        }
+        Client client = clientService.findByEmail(card.getClient().getEmail());
+        if (client == null){
+            return new ResponseEntity<>("Card not linked to any Client", HttpStatus.FORBIDDEN);
+        }
+        if (client.getAccounts().isEmpty()){
+            return new ResponseEntity<>("Client Does Not Have Accounts linked to this card", HttpStatus.FORBIDDEN);
+        }
+        for (Account account: client.getAccounts()){
+            if (account.getBalance() >= amount)
+            {
+                linkedAccount = account;
+                break;
+            }
+        }
+        if (linkedAccount == null){
+            return new ResponseEntity<>("Client Does Not Have Accounts with enough balance for payment", HttpStatus.FORBIDDEN);
+        }
+
+        double balance = linkedAccount.getBalance() - amount;
+        String message = "POSTNET Payment - CARD [****-" + number.substring(number.length()-4) +"] " +   description + " [" + linkedAccount.getNumber() + "]";
+        Transaction transaction = new Transaction(TransactionType.DEBIT, -amount, message, LocalDateTime.now(), balance);
+        linkedAccount.addTransaction(transaction);
+        linkedAccount.setBalance(balance);
+        transaction.setAccount(linkedAccount);
+        accountService.saveAccount(linkedAccount);
+        transactionService.saveTransaction(transaction);
+        return new ResponseEntity<>("Payment Successful", HttpStatus.OK);
+    }
+
 
     @GetMapping("/clients/current/cards")
     public ResponseEntity<Object> getCurrentCards(Authentication authentication)

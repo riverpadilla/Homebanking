@@ -112,7 +112,8 @@ public class LoanController {
         }
 
         double accountBalance = account.getBalance() + loanApplicationDTO.getAmount();
-        Transaction transaction = new Transaction(TransactionType.CREDIT, amount,loan.getName() + " Loan Approved", LocalDateTime.now(), accountBalance);
+        String message = loan.getName() + " Loan Approved. Credited to Account [" + account.getNumber() + "]";
+        Transaction transaction = new Transaction(TransactionType.CREDIT, amount, message, LocalDateTime.now(), accountBalance);
 
         ClientLoan clientLoan = new ClientLoan(loanApplicationDTO.getAmount() * loan.getInterest()/100 + loanApplicationDTO.getAmount(), loanApplicationDTO.getPayments());
         client.addLoan(clientLoan);
@@ -124,8 +125,8 @@ public class LoanController {
         accountService.saveAccount(account);
         clientLoanService.saveClientLoan(clientLoan);
 
-        return new ResponseEntity<>("Loan Created and accredited in account "
-                + loanApplicationDTO.getAccountToNumber(), HttpStatus.CREATED);
+        return new ResponseEntity<>("Loan Created and Credited in Account [" + account.getNumber() + "]"
+                , HttpStatus.CREATED);
     }
 
     @GetMapping("/loans")
