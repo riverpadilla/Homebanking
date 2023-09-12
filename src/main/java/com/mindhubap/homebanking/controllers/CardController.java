@@ -143,7 +143,7 @@ public class CardController {
 
         double balance = linkedAccount.getBalance() - amount;
         String message = "POSTNET Payment - CARD [****-" + number.substring(number.length()-4) +"] " +   description + " [" + linkedAccount.getNumber() + "]";
-        Transaction transaction = new Transaction(TransactionType.DEBIT, -amount, message, LocalDateTime.now(), balance);
+        Transaction transaction = new Transaction(TransactionType.DEBIT, -amount, message, LocalDateTime.now(), balance, true);
         linkedAccount.addTransaction(transaction);
         linkedAccount.setBalance(balance);
         transaction.setAccount(linkedAccount);

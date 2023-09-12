@@ -89,7 +89,7 @@ public class AccountController {
                 check = accountService.existsByNumber(number);
             }while(check);
 
-            Account account= new Account(number, LocalDate.now(), 0, type, client);
+            Account account= new Account(number, LocalDate.now(), 0, type, client, true);
 
             accountService.saveAccount(account);
             return new ResponseEntity<>("Account added to client " + account.getClient().getEmail() , HttpStatus.CREATED);

@@ -95,7 +95,7 @@ public class ClientController {
             check = accountService.existsByNumber(number);
         }while(check);
 
-        Account account = new Account(number, LocalDate.now(),0, AccountType.SAVING);
+        Account account = new Account(number, LocalDate.now(),0, AccountType.SAVING, true);
 
         accountService.saveAccount(account);
         client.addAccount(account);

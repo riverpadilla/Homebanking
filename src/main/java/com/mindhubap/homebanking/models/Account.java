@@ -23,6 +23,8 @@ public class Account {
 
     private AccountType type;
 
+    private boolean active;
+
     @ManyToOne(fetch = FetchType.EAGER)
     private Client client;
 
@@ -32,19 +34,21 @@ public class Account {
     public Account() {
     }
 
-    public Account(String number, LocalDate creationDate, double balance, AccountType type) {
+    public Account(String number, LocalDate creationDate, double balance, AccountType type, boolean active) {
         this.number = number;
         this.creationDate = creationDate;
         this.balance = balance;
         this.type = type;
+        this.active = active;
     }
 
-    public Account(String number, LocalDate creationDate, double balance, AccountType type, Client client) {
+    public Account(String number, LocalDate creationDate, double balance, AccountType type, Client client, boolean active) {
         this.number = number;
         this.creationDate = creationDate;
         this.balance = balance;
         this.type = type;
         this.client = client;
+        this.active = active;
     }
 
     public long getId() {
@@ -79,6 +83,14 @@ public class Account {
 
     public void setType(AccountType type) {
         this.type = type;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public Client getClient() {

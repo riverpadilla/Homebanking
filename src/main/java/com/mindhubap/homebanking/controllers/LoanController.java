@@ -112,7 +112,7 @@ public class LoanController {
 
         double accountBalance = account.getBalance() + loanApplicationDTO.getAmount();
         String message = loan.getName() + " Loan Approved. Credited to Account [" + account.getNumber() + "]";
-        Transaction transaction = new Transaction(TransactionType.CREDIT, amount, message, LocalDateTime.now(), accountBalance);
+        Transaction transaction = new Transaction(TransactionType.CREDIT, amount, message, LocalDateTime.now(), accountBalance, true);
 
         ClientLoan clientLoan = new ClientLoan(loanApplicationDTO.getAmount() * loan.getInterest()/100 + loanApplicationDTO.getAmount(), loanApplicationDTO.getPayments());
         client.addLoan(clientLoan);
