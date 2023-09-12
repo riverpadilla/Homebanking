@@ -1,5 +1,6 @@
 package com.mindhubap.homebanking;
 
+import com.mindhubap.homebanking.enums.AccountType;
 import com.mindhubap.homebanking.enums.CardColor;
 import com.mindhubap.homebanking.enums.CardType;
 import com.mindhubap.homebanking.enums.TransactionType;
@@ -62,7 +63,7 @@ public class RepositoriesTest {
     @Test
     public void addAccount(){
         Client client = clientRepository.findByEmail("riverpadilla@msn.com");
-        Account addedAccount = new Account("VIN-13572468",LocalDate.now(),100, client);
+        Account addedAccount = new Account("VIN-13572468",LocalDate.now(),100, AccountType.SAVING, client);
         accountRepository.save(addedAccount);
         Account retrievedAccount = accountRepository.findByNumber("VIN-13572468");
         assertThat(retrievedAccount, notNullValue());
@@ -135,7 +136,7 @@ public class RepositoriesTest {
 
     // Tests with Loan Repository
     @Test
-    public void existLoans(){
+    public void existsLoans(){
 
         List<Loan> loans = loanRepository.findAll();
         assertThat(loans,is(not(empty())));
@@ -149,21 +150,21 @@ public class RepositoriesTest {
     }
 
     @Test
-    public void existPersonalLoan(){
+    public void existsPersonalLoan(){
 
         List<Loan> loans = loanRepository.findAll();
         assertThat(loans, hasItem(hasProperty("name", is("Personal"))));
     }
 
     @Test
-    public void existMortgageLoan(){
+    public void existsMortgageLoan(){
 
         List<Loan> loans = loanRepository.findAll();
         assertThat(loans, hasItem(hasProperty("name", is("Mortgage"))));
     }
 
     @Test
-    public void existAutomotiveLoan(){
+    public void existsAutomotiveLoan(){
 
         List<Loan> loans = loanRepository.findAll();
         assertThat(loans, hasItem(hasProperty("name", is("Automotive"))));
@@ -172,7 +173,7 @@ public class RepositoriesTest {
     //Test with Transaction Repository
 
     @Test
-    public void existTransactions(){
+    public void existsTransactions(){
 
         List<Transaction> transactions = transactionRepository.findAll();
         assertThat(transactions,is(not(empty())));
