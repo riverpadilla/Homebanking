@@ -23,8 +23,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.mindhubap.homebanking.utils.Utils.*;
 
@@ -48,11 +49,21 @@ public class CardController {
     @GetMapping("/cards/all")
     public ResponseEntity<Object> getCards()
     {
-        List<Card> cards = cardService.findAllCards();
+        Set<Card> cards = new HashSet<>(cardService.findAllCards());
         if (cards.isEmpty()){
             return new ResponseEntity<>("Database does not contains cards", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(cardService.convertToCardDTO(new ArrayList<>(cards)), HttpStatus.OK);
+        return new ResponseEntity<>(cardService.convertToCardDTO(cards), HttpStatus.OK);
+    }
+
+    @GetMapping("/cards/active")
+    public ResponseEntity<Object> getActiveCards()
+    {
+        Set<Card> cards = cardService.findAllCardsByActive(true);
+        if (cards.isEmpty()){
+            return new ResponseEntity<>("Database does not contains Active Cards", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(cardService.convertToCardDTO(cards), HttpStatus.OK);
     }
 
     @GetMapping("/cards/{id}")
@@ -75,7 +86,7 @@ public class CardController {
         }
 
         cardService.deleteCard(card);
-        return new ResponseEntity<>("Card has been Deleted", HttpStatus.OK);
+        return new ResponseEntity<>("Applied a Soft Delete to this Card", HttpStatus.OK);
     }
 
     @Transactional
@@ -86,6 +97,8 @@ public class CardController {
         short cvv = cardPaymentDTO.getCvv();
         double amount = cardPaymentDTO.getAmount();
         String description = cardPaymentDTO.getDescription();
+        LocalDate thruDate = cardPaymentDTO.getThruDate();
+
         Account linkedAccount = null;
 
         Card card = cardService.findByNumber(number);
@@ -94,6 +107,15 @@ public class CardController {
         }
         if (card.getCvv() != cvv){
             return new ResponseEntity<>("Card Verification Value Incorrect", HttpStatus.FORBIDDEN);
+        }
+        if (!card.isActive()){
+            return new ResponseEntity<>("Card Does Exists (Deleted)", HttpStatus.FORBIDDEN);
+        }
+        if (!(card.getThruDate().getMonth().getValue() == thruDate.getMonth().getValue())){
+            return new ResponseEntity<>("Card Expiration Date is Wrong", HttpStatus.FORBIDDEN);
+        }
+        if (!(card.getThruDate().getYear() == thruDate.getYear())){
+            return new ResponseEntity<>("Card Expiration Date is Wrong", HttpStatus.FORBIDDEN);
         }
         if (card.getThruDate().isBefore(LocalDate.now())){
             return new ResponseEntity<>("Card Expired in " + card.getThruDate(), HttpStatus.FORBIDDEN);
@@ -130,7 +152,6 @@ public class CardController {
         return new ResponseEntity<>("Payment Successful", HttpStatus.OK);
     }
 
-
     @GetMapping("/clients/current/cards")
     public ResponseEntity<Object> getCurrentCards(Authentication authentication)
     {
@@ -138,8 +159,8 @@ public class CardController {
         if (client.getCards().isEmpty()){
             return new ResponseEntity<>("`Client " + client.getEmail() + " don't have cards", HttpStatus.BAD_REQUEST);
         }
-
-        return new ResponseEntity<>(cardService.convertToCardDTO(new ArrayList<>(client.getCards())), HttpStatus.OK);
+        Set<Card> cards = client.getCards().stream().filter(Card::isActive).collect(Collectors.toSet());
+        return new ResponseEntity<>(cardService.convertToCardDTO(cards), HttpStatus.OK);
     }
 
     @PostMapping("/clients/current/cards")
@@ -155,8 +176,8 @@ public class CardController {
         String cardHolder = client.getFirstName() + " " + client.getLastName();
         Card card = new Card(cardHolder, cardType,cardColor);
 
-        Long creditCardsCount = cardService.countByClientAndType(client, CardType.CREDIT);
-        Long debitCardsCount = cardService.countByClientAndType(client, CardType.DEBIT);
+        Long creditCardsCount = cardService.countByClientAndTypeAndActive(client, CardType.CREDIT,true);
+        Long debitCardsCount = cardService.countByClientAndTypeAndActive(client, CardType.DEBIT,true);
 
         if (cardType == CardType.CREDIT && creditCardsCount >= 3) {
             message = cardExceptionMessage(CardException.MAX_QTY_CREDIT,card);
@@ -168,7 +189,7 @@ public class CardController {
             return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
         }
 
-        if (cardService.existsByClientAndTypeAndColor(client,cardType,cardColor)){
+        if (cardService.existsByClientAndTypeAndColorAndActive(client,cardType,cardColor,true)){
             message = cardExceptionMessage(CardException.EXIST,card);
             return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
         }
@@ -181,7 +202,7 @@ public class CardController {
         } while(check);
 
         short cvv = generateCvv();
-        card = new Card(cardHolder, cardType, cardColor, number, cvv, LocalDate.now(),LocalDate.now().plusYears(5));
+        card = new Card(cardHolder, cardType, cardColor, number, cvv, LocalDate.now(),LocalDate.now().plusYears(5),true);
         client.addCard(card);
         cardService.saveCard(card);
         clientService.saveClient(client);

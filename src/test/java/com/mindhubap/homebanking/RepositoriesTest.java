@@ -98,7 +98,7 @@ public class RepositoriesTest {
     @Test
     public void addCard(){
         Card addedCard = new Card("Juan Perez",CardType.CREDIT, CardColor.GOLD, "1234-5678-9876-5432",
-                (short) 333,LocalDate.now(),LocalDate.now().plusYears(5));
+                (short) 333,LocalDate.now(),LocalDate.now().plusYears(5), true);
         cardRepository.save(addedCard);
         Card retrievedCard = cardRepository.findByNumber("1234-5678-9876-5432");
         assertThat(retrievedCard, notNullValue());

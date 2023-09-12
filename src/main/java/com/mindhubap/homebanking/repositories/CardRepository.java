@@ -7,16 +7,19 @@ import com.mindhubap.homebanking.models.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
+import java.util.List;
+import java.util.Set;
+
 @RepositoryRestResource
 public interface CardRepository extends JpaRepository<Card, Long> {
 
     boolean existsByNumber(String number);
 
-    boolean existsByClientAndTypeAndColor(Client client, CardType type, CardColor color);
+    boolean existsByClientAndTypeAndColorAndActive(Client client, CardType type, CardColor color, boolean active);
 
     Card findByNumber(String number);
 
-    Long countByClientAndType(Client client,CardType type);
+    Long countByClientAndTypeAndActive(Client client,CardType type, boolean active);
 
-
+    Set<Card> findAllByActive(boolean active);
 }

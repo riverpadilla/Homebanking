@@ -1,5 +1,7 @@
 package com.mindhubap.homebanking.dtos;
 
+import java.time.LocalDate;
+
 public class CardPaymentDTO {
 
    private String number;
@@ -10,11 +12,14 @@ public class CardPaymentDTO {
 
    private String description;
 
-    public CardPaymentDTO(String number, short cvv, double amount, String description) {
+   private LocalDate thruDate;
+
+    public CardPaymentDTO(String number, short cvv, double amount, String description, LocalDate thruDate) {
         this.number = number;
         this.cvv = cvv;
         this.amount = amount;
         this.description = description;
+        this.thruDate = thruDate;
     }
 
     public String getNumber() {
@@ -31,5 +36,9 @@ public class CardPaymentDTO {
 
     public String getDescription() {
         return description;
+    }
+
+    public LocalDate getThruDate() {
+        return thruDate;
     }
 }

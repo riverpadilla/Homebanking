@@ -35,18 +35,18 @@ public class CardServiceImplement implements CardService {
     }
 
     @Override
-    public Set<CardDTO> convertToCardDTO(List<Card> cards) {
+    public Set<CardDTO> convertToCardDTO(Set<Card> cards) {
         return cards.stream().map(CardDTO :: new).collect(Collectors.toSet());
     }
 
     @Override
-    public Long countByClientAndType(Client client, CardType cardType) {
-        return cardRepository.countByClientAndType(client, cardType);
+    public Long countByClientAndTypeAndActive(Client client, CardType cardType, boolean active) {
+        return cardRepository.countByClientAndTypeAndActive(client, cardType, active);
     }
 
     @Override
-    public boolean existsByClientAndTypeAndColor(Client client, CardType cardType, CardColor cardColor) {
-        return cardRepository.existsByClientAndTypeAndColor(client, cardType, cardColor);
+    public boolean existsByClientAndTypeAndColorAndActive(Client client, CardType cardType, CardColor cardColor,boolean active) {
+        return cardRepository.existsByClientAndTypeAndColorAndActive(client, cardType, cardColor, active);
     }
 
     @Override
@@ -61,6 +61,12 @@ public class CardServiceImplement implements CardService {
 
     @Override
     public void deleteCard(Card card) {
-        cardRepository.delete(card);
+        card.setActive(false);
+        cardRepository.save(card);
+    }
+
+    @Override
+    public Set<Card> findAllCardsByActive(boolean active) {
+        return cardRepository.findAllByActive(active);
     }
 }

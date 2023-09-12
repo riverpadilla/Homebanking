@@ -17,15 +17,17 @@ public interface CardService {
 
     Card findByNumber(String number);
 
-    Set<CardDTO> convertToCardDTO(List<Card> cards);
+    Set<CardDTO> convertToCardDTO(Set<Card> cards);
 
-    Long countByClientAndType(Client client, CardType cardType);
+    Long countByClientAndTypeAndActive(Client client, CardType cardType, boolean active);
 
-    boolean existsByClientAndTypeAndColor( Client client,CardType cardType, CardColor cardColor);
+    boolean existsByClientAndTypeAndColorAndActive( Client client,CardType cardType, CardColor cardColor, boolean active);
 
     boolean existsByNumber(String number);
 
     void saveCard(Card card);
 
     void deleteCard(Card card);
+
+    Set<Card> findAllCardsByActive(boolean active);
 }
