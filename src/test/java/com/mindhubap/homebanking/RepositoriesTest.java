@@ -63,7 +63,7 @@ public class RepositoriesTest {
     @Test
     public void addAccount(){
         Client client = clientRepository.findByEmail("riverpadilla@msn.com");
-        Account addedAccount = new Account("VIN-13572468",LocalDate.now(),100, AccountType.SAVING, client);
+        Account addedAccount = new Account("VIN-13572468",LocalDate.now(),100, AccountType.SAVING, client, true);
         accountRepository.save(addedAccount);
         Account retrievedAccount = accountRepository.findByNumber("VIN-13572468");
         assertThat(retrievedAccount, notNullValue());

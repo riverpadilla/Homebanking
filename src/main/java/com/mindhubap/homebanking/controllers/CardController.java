@@ -93,34 +93,29 @@ public class CardController {
     @PostMapping("/cards/postnet")
     public ResponseEntity<Object> paymentWithCard(@RequestBody CardPaymentDTO cardPaymentDTO)
     {
-        String number = cardPaymentDTO.getNumber();
-        short cvv = cardPaymentDTO.getCvv();
-        double amount = cardPaymentDTO.getAmount();
-        String description = cardPaymentDTO.getDescription();
-        LocalDate thruDate = cardPaymentDTO.getThruDate();
 
         Account linkedAccount = null;
 
-        Card card = cardService.findByNumber(number);
+        Card card = cardService.findByNumber(cardPaymentDTO.getNumber());
         if (card == null){
             return new ResponseEntity<>("Card with number sent Does Not Exists", HttpStatus.FORBIDDEN);
         }
-        if (card.getCvv() != cvv){
+        if (card.getCvv() != cardPaymentDTO.getCvv()){
             return new ResponseEntity<>("Card Verification Value Incorrect", HttpStatus.FORBIDDEN);
         }
         if (!card.isActive()){
             return new ResponseEntity<>("Card Does Exists (Deleted)", HttpStatus.FORBIDDEN);
         }
-        if (!(card.getThruDate().getMonth().getValue() == thruDate.getMonth().getValue())){
+        if (!(card.getThruDate().getMonth().getValue() == cardPaymentDTO.getThruDate().getMonth().getValue())){
             return new ResponseEntity<>("Card Expiration Date is Wrong", HttpStatus.FORBIDDEN);
         }
-        if (!(card.getThruDate().getYear() == thruDate.getYear())){
+        if (!(card.getThruDate().getYear() == cardPaymentDTO.getThruDate().getYear())){
             return new ResponseEntity<>("Card Expiration Date is Wrong", HttpStatus.FORBIDDEN);
         }
         if (card.getThruDate().isBefore(LocalDate.now())){
             return new ResponseEntity<>("Card Expired in " + card.getThruDate(), HttpStatus.FORBIDDEN);
         }
-        if (amount <= 0){
+        if (cardPaymentDTO.getAmount() <= 0){
             return new ResponseEntity<>("Payment Amount is Less or Equal to Zero", HttpStatus.FORBIDDEN);
         }
         Client client = clientService.findByEmail(card.getClient().getEmail());
@@ -131,7 +126,7 @@ public class CardController {
             return new ResponseEntity<>("Client Does Not Have Accounts linked to this card", HttpStatus.FORBIDDEN);
         }
         for (Account account: client.getAccounts()){
-            if (account.getBalance() >= amount)
+            if (account.getBalance() >= cardPaymentDTO.getAmount())
             {
                 linkedAccount = account;
                 break;
@@ -141,9 +136,10 @@ public class CardController {
             return new ResponseEntity<>("Client Does Not Have Accounts with enough balance for payment", HttpStatus.FORBIDDEN);
         }
 
-        double balance = linkedAccount.getBalance() - amount;
-        String message = "POSTNET Payment - CARD [****-" + number.substring(number.length()-4) +"] " +   description + " [" + linkedAccount.getNumber() + "]";
-        Transaction transaction = new Transaction(TransactionType.DEBIT, -amount, message, LocalDateTime.now(), balance, true);
+        double balance = linkedAccount.getBalance() - cardPaymentDTO.getAmount();
+        String message = "POSTNET Payment - CARD [****-" + cardPaymentDTO.getNumber().substring(cardPaymentDTO.getNumber().length()-4) +"] "
+                +  cardPaymentDTO.getDescription() + " [" + linkedAccount.getNumber() + "]";
+        Transaction transaction = new Transaction(TransactionType.DEBIT, -cardPaymentDTO.getAmount(), message, LocalDateTime.now(), balance, true);
         linkedAccount.addTransaction(transaction);
         linkedAccount.setBalance(balance);
         transaction.setAccount(linkedAccount);
