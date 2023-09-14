@@ -1,6 +1,5 @@
 package com.mindhubap.homebanking.controllers;
 
-import com.mindhubap.homebanking.dtos.AccountDTO;
 import com.mindhubap.homebanking.dtos.TransactionDTO;
 import com.mindhubap.homebanking.enums.TransactionType;
 import com.mindhubap.homebanking.models.Account;
@@ -27,13 +26,13 @@ import java.util.Set;
 public class TransactionController {
 
     @Autowired
-    TransactionService transactionService;
+    private TransactionService transactionService;
 
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
 
     @Autowired
-    ClientService clientService;
+    private ClientService clientService;
 
 
     @GetMapping("/transactions/all")

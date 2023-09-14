@@ -23,19 +23,19 @@ import java.util.Set;
 public class LoanController {
 
     @Autowired
-    ClientService clientService;
+    private ClientService clientService;
 
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
 
     @Autowired
-    TransactionService transactionService;
+    private TransactionService transactionService;
 
     @Autowired
-    LoanService loanService;
+    private LoanService loanService;
 
     @Autowired
-    ClientLoanService clientLoanService;
+    private ClientLoanService clientLoanService;
 
     @GetMapping("/loans/all")
     public ResponseEntity<Object> getAllLoans(){

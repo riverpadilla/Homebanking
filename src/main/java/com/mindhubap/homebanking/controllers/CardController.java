@@ -38,10 +38,10 @@ public class CardController {
     private CardService cardService;
 
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
 
     @Autowired
-    TransactionService transactionService;
+    private TransactionService transactionService;
 
     @Autowired
     private ClientService clientService;
