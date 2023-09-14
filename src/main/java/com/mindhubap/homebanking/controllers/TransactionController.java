@@ -21,13 +21,13 @@ import java.time.LocalDateTime;
 public class TransactionController {
 
     @Autowired
-    TransactionService transactionService;
+    private TransactionService transactionService;
 
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
 
     @Autowired
-    ClientService clientService;
+    private ClientService clientService;
 
     @Transactional
     @PostMapping("/transactions")
