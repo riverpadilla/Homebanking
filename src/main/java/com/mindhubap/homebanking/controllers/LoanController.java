@@ -21,19 +21,19 @@ import java.util.Set;
 public class LoanController {
 
     @Autowired
-    ClientService clientService;
+    private ClientService clientService;
 
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
 
     @Autowired
-    TransactionService transactionService;
+    private TransactionService transactionService;
 
     @Autowired
-    LoanService loanService;
+    private LoanService loanService;
 
     @Autowired
-    ClientLoanService clientLoanService;
+    private ClientLoanService clientLoanService;
 
     @Transactional
     @PostMapping("/loans")
@@ -74,7 +74,7 @@ public class LoanController {
                     HttpStatus.FORBIDDEN);
         }
         if(!loan.getPayments().contains(payments)){
-            return new ResponseEntity<>("Amount of Payment is not available for this Loan",
+            return new ResponseEntity<>("Amount of Payments is not available for this Loan",
                     HttpStatus.FORBIDDEN);
         }
 
